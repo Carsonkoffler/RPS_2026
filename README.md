@@ -1,1 +1,1 @@
-# tiedGame
+# RPS Study
