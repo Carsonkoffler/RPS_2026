@@ -451,11 +451,13 @@
 
                 /* Chat Bubbles */
                 .chat-bubble {
-                    max-width: 75%;
-                    padding: 10px 14px;
+                    max-width: 80%;
+                    padding: 12px 16px;
                     font-size: 14px;
-                    line-height: 1.45;
-                    word-wrap: break-word;
+                    line-height: 1.5;
+                    overflow-wrap: break-word;
+                    text-align: left;
+                    box-sizing: border-box;
                 }
 
                 .chat-status-bar {
@@ -562,7 +564,7 @@
 
                 /* Widen the survey page */
                 .jspsych-content {
-                    max-width: 1000px !important;
+                    max-width: 1200px !important;
                     width: 95% !important;
                 }
 
@@ -622,7 +624,6 @@
    */}
 
    // experiment set up folder: init jsPsych, preload images, set up basic var (participant name, prolific info, participant_images, computer_images, choices)
-   {
         var jsPsych = initJsPsych();
 
         var timeline = [];
@@ -684,7 +685,6 @@
         };
 
         var choices = ['rock', 'paper', 'scissors'];
-        }
    // consent 
     var consent ={
     type: jsPsychHtmlButtonResponse,
@@ -722,18 +722,18 @@
     type: window.jsPsychHtmlButtonResponse,
     choices: ["Continue"],
     stimulus: `<p>
-        Thank you for choosing to participate in this study! We are investigating how making decisions under strict time pressures relates to performance on other cognitive tasks.<br>
+        Thank you for choosing to participate in this study! We are investigating how making decisions under strict time pressures relates to performance on other cognitive tasks.<br><br>
         The study has three parts. 
         </p>
         <p style="line-height:2">
         First, you will be paired with another participant online to play a game of Rock, Paper, Scissors under strict countdown timers.<br>
-        Nexxt, you will have a brief window to reflect on the game and your decision strategies with your paired opponent.<br>
+        Next, you will have a brief window to reflect on the game and your decision strategies with your paired opponent.<br>
         Finally, you'll complete a word-classification task on your own. This task will not be timed, so you can work at your own pace. 
         </p> 
 
         <p>Click <i>Continue</i> when you are ready to begin.</p>`
     };
-    //timeline.push(welcome); //add some call function for vsync_rate as if we are checking for a certain rate 
+    timeline.push(welcome); //add some call function for vsync_rate as if we are checking for a certain rate 
     
     //computer name (random assignment to popular name)
     var computerName = 
@@ -741,12 +741,13 @@
             ['Maria', 'James', 'Andre', 'Rohan', 'Zoe'], 1)[0];
     document.getElementById("opponent-label").textContent = computerName;
 
+    
     //fullscreen 
-    /*
     timeline.push({
         type: jsPsychFullscreen, 
         fullscreen_mode: true
-    });*/ 
+    });
+    
 
     //record browser interactions/fullscreen minimizations --> need to add this to data saved 
     function summarizeBrowserInteractions() {
@@ -788,9 +789,9 @@
             <div class="rps-instructions">
                 <h2>How to Play</h2>
 
-                <p>Each round, you and the other player will each choose rock, paper, or scissors.</p>
+                <p>Each round, you and the other participant will each choose rock, paper, or scissors.</p>
 
-                <ul style="text-align:start; margin-left: 20px; margin-bottom: 20px">
+                <ul style="text-align:start; margin-left: 275px; margin-bottom: 20px">
                     <li>Rock beats scissors.</li>
                     <li>Scissors beats paper.</li>
                     <li>Paper beats rock.</li>
@@ -804,8 +805,7 @@
             <div class="rps-instructions">
                 <h2>Selecting Your Choice</h2>
 
-                <p>At the beginning of each round, a countdown
-                will appear on the screen.</p>
+                <p>At the beginning of each round, a countdown will appear on the screen.</p>
 
                 <p>While the countdown is running, drag your chosen
                 option into your box. You can change your selection
@@ -814,8 +814,7 @@
                 <p><strong>When "GO!" appears, your selection becomes
                 fixed and cannot be changed.</strong></p>
 
-                <p>Make sure your choice is in the box before
-                the countdown ends.</p>
+                <p>Make sure your choice is in the box before the countdown ends.</p>
             </div>
             `,
 
@@ -823,14 +822,10 @@
             `
             <div class="rps-instructions">
                 <h2>Locking In Your Choice</h2>
-
-                <p>When "GO!" appears, press <strong>Enter</strong>
-                or <strong>Space</strong> as quickly as possible
-                to lock in your choice.</p>
+                <p>When "GO!" appears, press <strong>Enter</strong> or <strong>Space</strong> as quickly as possible to lock in your choice.</p>
 
                 <p>You must respond within <strong>3 seconds</strong>.
-                If you do not respond in time, your selection will not count, and you will
-                automatically lose the round.</p>
+                If you do not respond in time, your selection will not count, and you will automatically lose the round.</p>
 
                 <p>Once both choices are locked in or the time runs out, the outcome of the round will be displayed.</p>
 
@@ -843,12 +838,10 @@
             <div class="rps-instructions">
                     <h2>Round Outcomes</h2>
 
-                    <p>After both players have locked in their choices,
-                    the choices will be revealed and the outcome of
+                    <p>After both participants have locked in their choices, the choices will be revealed and the outcome of
                     the round will be displayed.</p>
 
-                    <p>After viewing the result, you will proceed
-                    to the next round.</p>
+                    <p>After viewing the result, you will proceed to the next round.</p>
             </div>
             `,
             // Page 6: Reward structure
@@ -893,7 +886,7 @@
             task: "rps_instructions"
         }
     }; 
-    //timeline.push(rps_instructions);
+    timeline.push(rps_instructions);
     //comprehension check 
     var instructions_comprehension_check = {
       type: jsPsychSurveyMultiChoice, 
@@ -935,9 +928,9 @@
         {
           prompt: "How much do you receive if you win best out of four?",
           options: jsPsych.randomization.shuffle([
-            "XXX.",
-            "XXX.",
-            "XXX."
+            "$3",
+            "$2",
+            "$1"
           ]),
           required: true,
           horizontal: false, 
@@ -947,7 +940,7 @@
         button_label: "Submit", 
         randomize_question_order: false
     }; 
-    //timeline.push(instructions_comprehension_check);
+    timeline.push(instructions_comprehension_check);
     //TO DO: if do poorly on comprehension check, make them re-read the instructions 
 
     //practice round intro --> want to say something like getting used to the speed needed 
@@ -966,7 +959,7 @@
             To start, press Begin. 
             </p>`
     };
-    //timeline.push(practice_intro);
+    timeline.push(practice_intro);
     
     //practice round game code
     const PRACTICE_MAX_RESPONSE_TIME = 3000; //allows for 3 seconds after "Go"
@@ -1308,7 +1301,6 @@
                 }
             };
         };
-    /*
        timeline.push({
             timeline: [
                 //three practice rounds, but can add more by pasting more createRPSPracticeRound()
@@ -1316,7 +1308,7 @@
                 createRPSPracticeRound(),
                 createRPSPracticeRound(), 
             ]
-        });*/
+        });
     
     //main game logic 
     //instructions
@@ -1463,7 +1455,7 @@
                 }
             }
         };
-        //timeline.push(main_game_intro);
+        timeline.push(main_game_intro);
         //var participantName = "Jada";
         document.getElementById("participant-label").textContent = participantName;
         var pairing_duration = (Math.random() * (30 - 25 + 1) + 25) * 1000; //25-30
@@ -1503,7 +1495,7 @@
                 task: "pairing_screen"
             }
         };
-        //timeline.push(pairing_screen);
+        timeline.push(pairing_screen);
 
         //code for the main game starts here --> 
         function createRPSRound() {
@@ -2056,7 +2048,6 @@
                 }
             };
         }
-        /*
         timeline.push({
             timeline: [
                 //4 main game rounds 
@@ -2065,7 +2056,7 @@
                 createRPSRound(), 
                 createRPSRound()
             ]
-        });*/
+        });
         
         // switch to end game screen when round 4 is complete. show overall outcome and score and turn the scoreboard into actualized earnings
         function createRPSEndTrial() {
@@ -2234,104 +2225,165 @@
             <p>
             The bonus earnings have been calculated and added to your scoreboard.
             </p>
-            
             <p>
                 Before proceeding to the next task, you will have a short opportunity to send a message to the other participant.
             </p>
-            
             <p>
                 Research shows that reflecting on how you made previous decisions allows for easier task-switching.<br><br>
                 Feel free to share your thoughts, strategy, or post-match comments.
             </p>`
             
         };
-        //timeline.push(message_intro);
+        timeline.push(message_intro);
 
         //randomly assign the participant to one of three conditions: skill, luck, or none (control)
         const infoConditions = ["skill", "luck", "none"];
         const participant_info = jsPsych.randomization.sampleWithoutReplacement(
             infoConditions, 1)[0];
 
-        //Post-Game Messages (To Do: edit this a bit with Mike)
         const postGameMessages = {
-            lose: { // Participant lost overall
-                skill: "gg! i noticed you kept opening with paper so i tried to counter with scissors on the important rounds.",
-                luck: "gg! i had no strategy at all honestly, i was just clicking randomly every round without thinking lol.",
-                none: "good game. this  was fun" //check if lowercase is allowed for this 
+            skill: {
+                core: [
+                    "I have a background in game design, so I'm pretty good at noticing patterns and predicting behaviors.",
+                    "I play a lot of poker, so I guess I'm just good at predicting what other people are gonna do.",
+                    "I'm a competitive video game player, so I'm used to finding a strategy and making decisions quickly. Maybe that translated here."
+                ],
+                win: [
+                    "Looks like I was able to read you pretty well.",
+                    "Looks like my strategy worked."
+                ],
+                tie: [
+                    "Maybe we were trying to outsmart each other.",
+                    "Maybe our strategies counteracted each other."
+                ],
+                lose: [
+                    "Looks like I wasn't able to read you.",
+                    "Looks like my strategy didn't work."
+                ]
             },
-            tie: { // Participant tied overall
-                skill: "tie game! i was trying to predict your pattern based on previous rounds, but you kept switching it up.",
-                luck: "tie game! i was just picking totally at random every time, funny how we ended up tying!",
-                none: "good game. this  was fun"
+
+            luck: {
+                core: [
+                    "Honestly, I was just picking things randomly. I didn't really have a strategy.",
+                    "I'm pretty sure this game is just random chance. I didn't think about my choices too deeply.",
+                    "I didn't have a system for choosing. I was just trying to pick something before the timer went out."
+                ],
+                win: [
+                    "Guess I'm just lucky.",
+                    "Looks like luck was on my side."
+                ],
+                tie: [
+                    "Guess we're both lucky.",
+                    "Looks like the random odds balanced out."
+                ],
+                lose: [
+                    "Guess I'm not very lucky.",
+                    "Looks like luck wasn't on my side."
+                ]
             },
-            win: { // Participant won overall
-                skill: "gg you got me! i tried to read your choices and play strategically but you outplayed me.",
-                luck: "gg! i was choosing totally at random every round so i guess my luck ran out haha.",
-                none: "good game. this  was fun"
+
+            none: {
+                core: [
+                    "nice playing with you {participantName}. this was actually pretty fun.",
+                    "man that was quicker than i thought it was going to be. thanks for the match {participantName}.",
+                    "hey {participantName}. Hope the experiment is going well for you so far."
+                ],
+                win: [
+                    "Looks like I ended up winning the match.",
+                    "Looks like I got the win here."
+                ],
+                tie: [
+                    "Looks like we ended up tying the match.",
+                    "Looks like we tied."
+                ],
+                lose: [
+                    "Looks like you ended up winning the match.",
+                    "Looks like you got the win here."
+                ]
             }
         };
-
-        //messaging function 
+        // Helper: randomly select one message
+        function getRandomMessage(messages) {
+            return jsPsych.randomization.sampleWithoutReplacement(messages, 1)[0];
+        } 
+        // messaging function 
         function createChatTrial(participant_outcome, infoCondition) {
-            const opponentMessageText = postGameMessages [participant_outcome][infoCondition];
+            // Variable shared between on_start and on_load via closure
+            let opponentMessageText = "";
+
             return {
                 type: jsPsychHtmlKeyboardResponse,
                 choices: "NO_KEYS",
-                stimulus: `
-                    <div style="max-width: 800px; margin: 0 auto;">
-                        <h3>Post-Game Note</h3>
-                        <p style="font-size: 18px; color: #333; margin-bottom: 15px;">
-                            Share a quick note with <strong>${computerName}</strong> about your strategy or any thoughts you had during the game before proceeding.
-                        </p>
+                stimulus: function() {
+                    return `
+                        <div style="max-width: 800px; margin: 0 auto;">
+                            <h3>Post-Game Note</h3>
+                            <p style="font-size: 18px; color: #333; margin-bottom: 15px;">
+                                Share a quick note with <strong>${computerName}</strong> about your strategy or any thoughts you had during the game before proceeding.
+                            </p>
 
-                        <div class="chat-window">
-                            <div class="chat-header">
-                                Match Chat: ${participantName} & ${computerName}
-                            </div>
+                            <div class="chat-window">
+                                <div class="chat-header">
+                                    Match Chat: ${participantName} & ${computerName}
+                                </div>
 
-                            <div id="chat-status" class="chat-status-bar">
-                                Connecting to match chat...
-                            </div>
+                                <div id="chat-status" class="chat-status-bar">
+                                    Connecting to match chat...
+                                </div>
 
-                            <div id="chat-messages" class="chat-messages">
-                                <!-- Messages bubbles inserted here -->
-                            </div>
+                                <div id="chat-messages" class="chat-messages">
+                                    <!-- Messages bubbles inserted here -->
+                                </div>
 
-                            <div class="chat-input-area" style="flex-direction:column;">
-                                <div style="display:flex; gap: 10px; width:100%;">
-                                <input type="text" id="user-msg-input" placeholder="Type your note here..." maxlength="300" autocomplete="off" />
-                                <button id="send-msg-btn">Send</button>
+                                <div class="chat-input-area" style="flex-direction:column;">
+                                    <div style="display:flex; gap: 10px; width:100%;">
+                                    <input type="text" id="user-msg-input" placeholder="Type your note here..." maxlength="300" autocomplete="off" />
+                                    <button id="send-msg-btn">Send</button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <button id="proceed-btn" style="
-                            display: none;
-                            margin: 20px auto 0;
-                            padding: 12px 30px;
-                            font-size: 16px;
-                            font-weight: bold;
-                            cursor: pointer;
-                            border-radius: 6px;
-                            border: solid 1px #ccc;
-                            background-color: white;
-                            color: #515357;
-                        ">
-                            Continue
-                        </button>
-                    </div>
-                `,
-                data: {
-                    task: "post_game_chat",
-                    outcome_condition: participant_outcome,
-                    info_condition: infoCondition,
-                    opponent_message_sent: opponentMessageText
+                            <button id="proceed-btn" style="
+                                display: none;
+                                margin: 20px auto 0;
+                                padding: 12px 30px;
+                                font-size: 16px;
+                                font-weight: bold;
+                                cursor: pointer;
+                                border-radius: 6px;
+                                border: solid 1px #ccc;
+                                background-color: white;
+                                color: #515357;
+                            ">
+                                Continue
+                            </button>
+                        </div>
+                    `;
+                },
+                on_start: function(trial) {
+                    // Fallbacks prevent runtime errors if conditions or outcomes don't match dictionary keys exactly
+                    const cond = infoCondition && postGameMessages[infoCondition] ? infoCondition : "none";
+                    const messages = postGameMessages[cond];
+                    const outcomeKey = messages[participant_outcome] ? participant_outcome : "tie";
+
+                    const coreMessage = getRandomMessage(messages.core).replace(/\{participantName\}/g, participantName);
+                    const outcomeMessage = getRandomMessage(messages[outcomeKey]);
+                    
+                    // Assign directly to closure variable
+                    opponentMessageText = `${coreMessage} ${outcomeMessage}`;
+                    
+                    trial.data = {
+                        task: "post_game_chat",
+                        outcome_condition: participant_outcome,
+                        info_condition: cond,
+                        opponent_message_sent: opponentMessageText
+                    };
                 },
 
                 on_load: function() {
+                    // opponentMessageText is directly accessible here
                     const chatMessages = document.getElementById("chat-messages");
                     const chatStatus = document.getElementById("chat-status");
-                    const typingIndicator = document.getElementById("opponent-typing");
                     const msgInput = document.getElementById("user-msg-input");
                     const sendBtn = document.getElementById("send-msg-btn");
                     const proceedBtn = document.getElementById("proceed-btn");
@@ -2340,11 +2392,10 @@
                     let userMessageSent = false;
                     let opponentMessageRevealed = false;
 
-                    // Auto-focus text input on load
                     msgInput.focus();
 
                     function showTypingIndicator() {
-                        if(document.getElementById("opponent-typing")) {return;}
+                        if(document.getElementById("opponent-typing")) return;
                         const typingIndicator = document.createElement("div");
                         typingIndicator.id = "opponent-typing";
                         typingIndicator.className = "typing-indicator";
@@ -2373,7 +2424,6 @@
                         }
                     }
 
-                    // Function to post user message to the right side
                     function handleUserSend() {
                         const text = msgInput.value.trim();
                         if (text === "" || userMessageSent) return;
@@ -2381,65 +2431,49 @@
                         userMessageSent = true;
                         participantTypedText = text;
 
-                        // Disable input controls
                         msgInput.disabled = true;
                         sendBtn.disabled = true;
                         sendBtn.textContent = "Sent";
 
-                        // Append user message bubble (Right)
                         const userBubble = document.createElement("div");
                         userBubble.className = "chat-bubble bubble-user";
                         userBubble.textContent = text;
                         chatMessages.appendChild(userBubble);
 
-                        // Scroll to bottom
                         chatMessages.scrollTop = chatMessages.scrollHeight;
 
                         checkProceedCondition();
-
-                        // Schedule opponent message reveal if not revealed yet
-                        // scheduleOpponentResponse();
                     }
 
-                    //opponent message timeline 
-                    const connectionDelay = 1500; //delay between connecting and chat connected appears 
-                    const thinkingDelay = Math.floor(Math.random() * 1500) + 2000; // 2-3.5 seconds
-                    const firstDraftDelay = 1800; // 1.8 seconds
-                    const pauseDeleteDelay = 1800; // 1.5 seconds
-                    const secondDraftDelay = 1500 + opponentMessageText.length * 25; // 1.5 seconds + scaling function
+                    const connectionDelay = 1500;
+                    const thinkingDelay = Math.floor(Math.random() * 1500) + 2000;
+                    const firstDraftDelay = 1800;
+                    const pauseDeleteDelay = 1800;
+                    const secondDraftDelay = 1500 + opponentMessageText.length * 25;
 
-                    // STEP 1: connectionDelay -> Switch status to "Chat connected"
                     setTimeout(function() {
                         if (chatStatus) chatStatus.textContent = "Chat connected";
 
-                        // STEP 2: thinkingDelay -> Show typing indicator
                         setTimeout(function() {
                             showTypingIndicator();
 
-                            // STEP 3: firstDraftDelay -> Erase / Pause draft
                             setTimeout(function() {
                                 removeTypingIndicator();
 
-                                // STEP 4: pauseDeleteDelay -> Show typing indicator again
                                 setTimeout(function() {
                                     showTypingIndicator();
 
-                                    // STEP 5: secondDraftDelay -> Post final message
                                     setTimeout(function() {
                                         removeTypingIndicator();
 
-                                        // Append opponent message bubble (Left)
                                         const opponentBubble = document.createElement("div");
                                         opponentBubble.className = "chat-bubble bubble-opponent";
                                         opponentBubble.textContent = opponentMessageText;
                                         chatMessages.appendChild(opponentBubble);
 
-                                        // Scroll to bottom
                                         chatMessages.scrollTop = chatMessages.scrollHeight;
 
                                         opponentMessageRevealed = true;
-
-                                        // Check if user has also sent message
                                         checkProceedCondition();
 
                                     }, secondDraftDelay);
@@ -2452,7 +2486,6 @@
 
                     }, connectionDelay);
 
-                    // Listeners for sending message
                     sendBtn.addEventListener("click", handleUserSend);
                     msgInput.addEventListener("keydown", function(e) {
                         if (e.key === "Enter") {
@@ -2461,7 +2494,6 @@
                         }
                     });
 
-                    // Save typed message to jsPsych data upon completing trial
                     proceedBtn.addEventListener("click", function() {
                         jsPsych.data.addDataToLastTrial({
                             participant_typed_message: participantTypedText
@@ -2471,7 +2503,7 @@
                 }
             };
         }
-        //timeline.push(createChatTrial(participant_outcome, participant_info)); 
+        timeline.push(createChatTrial(participant_outcome, participant_info)); 
 
 
         var filler_lists = [
@@ -2541,7 +2573,7 @@
             `,
             choices: ["Continue"]
         };
-        //timeline.push(filler_intro);
+        timeline.push(filler_intro);
 
         //filler task
         var filler_trials = filler_lists.map(function(list, index) {
@@ -2642,7 +2674,7 @@
             };
         });
         // Add the five trials to the timeline
-        //timeline.push(...filler_trials);
+        timeline.push(...filler_trials);
         
         //Measures 
         // we are going to ask some questions about your perceptions of the earlier game 
@@ -2755,8 +2787,8 @@
         var dv_TAR = {
         type: jsPsychSurveyLikert,
         preamble: `
-        <div style="position: fixed; top: 0; background-color: white; padding: 10px; width: 95%; max-width: 1000px; border-bottom: 2px solid #ddd; z-index: 100;">
-        <p>For the set of questions below, we would like you to imagine how you might feel, think, and behave <b>towards your opponent</b> if you encountered them in the future. Select the choice that most aligns.</p>
+        <div style="position: fixed; top: 0; background-color: white; padding: 10px; width: 95%; max-width: 1200px; border-bottom: 2px solid #ddd; z-index: 100;">
+        <p>For the set of questions below, we would like you to imagine how you might feel, think, and behave<br><b>towards your opponent</b> if you encountered them in the future. Select the choice that most aligns.</p>
 
         <h3>I imagine myself...</h3>
         </div>
@@ -2838,123 +2870,123 @@
         var dv_emotion_checklist = {
         type: jsPsychSurveyLikert,
         preamble: `
-        <div style="position: fixed; top: 0; background-color: white; padding: 10px; width: 95%; max-width: 1000px; border-bottom: 2px solid #ddd; z-index: 100;">
+        <div style="position: fixed; top: 0; background-color: white; padding: 50px; width: 95%; max-width: 1200px; border-bottom: 2px solid #ddd; z-index: 100;">
         <p>For the list below, please indicate which of these emotions you <b>feel towards your opponent</b>.</p>
         </div>
-        <div style="margin-top: 80px;">
+        <div style="margin-top: 130px;">
         `,
         questions: [
             {
             prompt: "<p>Envious</p>",
-            name: "dv2_state_envy",
+            name: "dv3_state_envy",
             labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
             required: true
             },
             {
             prompt: "<p>Jealous</p>",
-            name: "dv2_state_jealous",
+            name: "dv3_state_jealous",
             labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
             required: true  
             },
             {
             prompt: "<p>Bitter</p>", 
-            name: "dv2_state_bitter",
+            name: "dv3_state_bitter",
             labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
             required: true
             },
             {
             prompt: "<p>Resentful</p>",
-            name: "dv2_state_resentful",
+            name: "dv3_state_resentful",
             labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
             required: true
             },
             {
             prompt: "<p>Happy</p>",
-            name: "dv2_state_happy",
+            name: "dv3_state_happy",
             labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
             required: true
             },
             {
             prompt: "<p>Compassionate</p>",
-            name: "dv2_state_compassionate",
+            name: "dv3_state_compassionate",
             labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
             required: true
             },
             {
             prompt: "<p>Surprised</p>", 
-            name: "dv2_state_surprised",
+            name: "dv3_state_surprised",
             labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
             required: true
             }, 
             {
             prompt: "<p>Grateful</p>", 
-            name: "dv2_state_grateful",
+            name: "dv3_state_grateful",
             labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
             required: true
             }, 
             {
             prompt: "<p>Thankful</p>", 
-            name: "dv2_state_thankful",
+            name: "dv3_state_thankful",
             labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
             required: true
             }, 
             {
             prompt: "<p>Sad</p>", 
-            name: "dv2_state_sad",
+            name: "dv3_state_sad",
             labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
             required: true
             }, 
             {
             prompt: "<p>Upset</p>", 
-            name: "dv2_state_upset",
+            name: "dv3_state_upset",
             labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
             required: true
             }, 
             {
             prompt: "<p>Disappointed</p>",
-            name: "dv2_state_disappointed",
+            name: "dv3_state_disappointed",
             labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
             required: true
             }, 
             {
             prompt: "<p>Annoyed</p>",
-            name: "dv2_state_annoyed",
+            name: "dv3_state_annoyed",
             labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
             required: true
             }, 
             {
             prompt: "<p>Mad</p>",
-            name: "dv2_state_mad",
+            name: "dv3_state_mad",
             labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
             required: true
             }, 
             {
             prompt: "<p>Angry</p>",
-            name: "dv2_state_angry",
+            name: "dv3_state_angry",
             labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
             required: true
             }, 
             {
             prompt: "<p>Shame</p>", 
-            name: "dv2_state_shame",
+            name: "dv3_state_shame",
             labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
             required: true
             }, 
             {
             prompt: "<p>Contempt</p>", 
-            name: "dv2_state_contempt",
+            name: "dv3_state_contempt",
             labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
             required: true
             }, 
             {
             prompt: "<p>Joy</p>", 
-            name: "dv2_state_joy",
+            name: "dv3_state_joy",
             labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
             required: true
             }, 
             {
             prompt: "<p>Irritated</p>", 
-            name: "dv2_state_irritated",
+            name: "dv3_state_irritated",
             labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
             required: true
             }
@@ -2971,89 +3003,98 @@
         <p>The following questions are about the whole $4 bonus that you and your opponent were playing for, not just the amount you received.<br><br>
             Please indicate how strongly you agree with the following statements.</p>
         </div>
-        <div style="margin-top: 120px;">
+        <div style="margin-top: 140px;">
         `,
         questions: [
             {
             prompt: "<p>I feel like the $4 bonus is mine.</p>",
-            name: "dv3_mine",
+            name: "dv4_mine",
             labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
             required: true
             },
             {
             prompt: "<p>I feel a very high degree of personal ownership of the $4 bonus.</p>",
-            name: "dv3_personal_ownership",
+            name: "dv4_personal_ownership",
             labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
             required: true  
             },
             {
             prompt: "<p>I feel like I own the $4 bonus.</p>", 
-            name: "dv3_self_own",
+            name: "dv4_self_own",
             labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
             required: true
             },
             {
             prompt: "<p>The $4 bonus belongs to my opponent.</p>",
-            name: "dv3_other_belong",
+            name: "dv4_other_belong",
             labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
             required: true
             },
             {
             prompt: "<p>My opponent owns the $4 bonus.</p>",
-            name: "dv3_other_own",
+            name: "dv4_other_own",
             labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
             required: true
             },
             {
             prompt: "<p>I feel like the $4 bonus belongs to me and my opponent.</p>",
-            name: "dv3_belong_us",
+            name: "dv4_belong_us",
             labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
             required: true
             },
             {
             prompt: "<p>My opponent and I jointly own the $4 bonus.</p>", 
-            name: "dv3_joint_own",
+            name: "dv4_joint_own",
             labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
             required: true
             }, 
             {
             prompt: "<p>I feel a high degree of shared ownership of the $4 bonus.</p>", 
-            name: "dv3_shared_own",
+            name: "dv4_shared_own",
             labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
             required: true
             }, 
             {
             prompt: "<p>I deserve the amount of money I received.</p>", 
-            name: "dv3_deserve_self",
+            name: "dv4_deserve_self",
             labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
             required: true
             }, 
             {
             prompt: "<p>My opponent deserves the amount of money they received.</p>", 
-            name: "dv3_deserve_other",
+            name: "dv4_deserve_other",
             labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
             required: true
             }, 
         ],
         randomize_question_order: true,
+        on_finish: function(data){
+            scoreboard.style.display = "none";
+            }
         }; 
         timeline.push(dv_ownership); 
 
+        const save_data = {
+            type: jsPsychPipe,
+            action: "save",
+            experiment_id: "bxhBJ7Rd5Yt4",
+            filename: filename,
+            data_string: () => jsPsych.data.get().csv()  // now includes subject_id column
+            };
+        timeline.push(save_data);
+
        var RA_end = {
-            type: jsPsychHtmlButtonResponse,
-            stimulus: `
-                <h2>Demos, Funnel, and Debrief</h2>
-                <p>Demogrphics, funnel questions, and a debrief will follow, but that isn't necessary for you to review</p>
-                <p>So, this is where you and I part ways.</p>
-            `,
-            choices: ["Goodbye."], 
-            on_finish: function(data){
-                if(data.response === 0){
-                    setTimeout(function() {
-                        window.location.href = "https://forms.gle/v5rLdjptERog5H6u5" //to do: add google form here 
-                    }, 7000); // 7 second redirect
-                }
-            }
+        type: jsPsychHtmlButtonResponse,
+        stimulus: `
+            <h2>Demos, Funnel, and Debrief</h2>
+            <p>Demographics, funnel questions, and a debrief will follow, but that isn't necessary for you to review.</p>
+            <p>So, this is where you and I part ways.</p>
+        `,
+        choices: ["Goodbye."],
+        trial_duration: 10000, // End automatically after 10 seconds
+        on_finish: function(data) {
+            window.location.href = "https://forms.gle/v5rLdjptERog5H6u5";
+        }
         };
         timeline.push(RA_end);
         
@@ -3175,7 +3216,7 @@
         ], 
         data: {task: "survey"}
         };
-        timeline.push(funnel_questions); 
+        //timeline.push(funnel_questions); 
 
         ///exit fullscreen before debrief
         const exit_fullscreen = {
@@ -3185,15 +3226,15 @@
         timeline.push(exit_fullscreen);
 
         // save data using jsPsych-Pipe
-        /*const save_data = {
+        /*
+        const save_data = {
             type: jsPsychPipe,
             action: "save",
             experiment_id: "bxhBJ7Rd5Yt4",
             filename: filename,
             data_string: () => jsPsych.data.get().csv()  // now includes subject_id column
             };
-        timeline.push(save_data);
-        */ 
+        timeline.push(save_data);*/
 
         //debrief 
         var debrief = {
@@ -3208,7 +3249,7 @@
         `, 
         choices: ["Complete"],       // prevent manual advancement
         trial_duration: 60000,     // display for a minute
-        on_finish: function() {
+        on_finish: function(data) {
             window.location.href = "https://app.prolific.co/submissions/complete?cc=XXXX";  // PUT PROLIFIC COMPLETION URL HERE 
         }
         };
