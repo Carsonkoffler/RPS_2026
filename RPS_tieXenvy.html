@@ -1,0 +1,3220 @@
+<!-- rock paper scissors, tie condition -->
+<!DOCTYPE html>
+<html lang = "eng">
+    <head>
+        <meta charset="UTF-8">
+        <title>Decision Making</title>
+        <!-- jsPsych core + plugins -->
+        <script src="https://unpkg.com/@jspsych/extension-pipe@0.2.0"></script>
+        <script src="https://unpkg.com/jspsych@8.0.0"></script>
+        <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@2.0.0"></script>
+        <script src="https://unpkg.com/@jspsych/plugin-fullscreen@1.2.1"></script>
+
+        <script src="https://unpkg.com/@jspsych/plugin-html-button-response@2.0.0"></script>
+        <script src="https://unpkg.com/@jspsych/plugin-preload@2.0.0"></script>
+        <script src="https://unpkg.com/@jspsych/plugin-survey-likert@2.0.0"></script>
+        <script src="https://unpkg.com/@jspsych/plugin-survey-text@2.0.0"></script>
+        <script src="https://unpkg.com/@jspsych/plugin-survey-multi-select@1.1.3"></script>
+        <script src="https://unpkg.com/@jspsych/plugin-survey-multi-choice@2.1.0"></script>
+        <link href="https://unpkg.com/jspsych@8.0.0/css/jspsych.css" rel="stylesheet" />
+        <script src="https://unpkg.com/@jspsych/plugin-instructions@1.1.4"></script>
+        <script src="https://unpkg.com/@jspsych/plugin-survey-html-form@1.0.3"></script>
+        <script src="https://unpkg.com/@jspsych-contrib/plugin-pipe"></script>
+    </head>
+    <body>
+        <div id="scoreboard" style="
+        display: none;
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        width: 200px;
+        background-color: lightblue;
+        border: 2px solid black;
+        border-radius: 8px;
+        padding: 10px;
+        color: black;
+        font-family: sans-serif;
+        z-index: 1000;">
+        <strong id = "scoreboard-title">SCOREBOARD</strong><br>
+        <span id = "participant-label">You</span>: <span id="player-score">0</span><br>
+        <span id="opponent-label">Opponent</span>: <span id="computer-score">0</span>
+        </div>
+        <style>
+            /* Practice game container */
+                #practice-game-area {
+                    max-width: 1100px;
+                    margin: 0 auto;
+                    text-align: center;
+                    font-family: Arial, sans-serif;
+                }
+
+                #practice-instructions {
+                    font-size: 20px;
+                    margin: 20px 0;
+                    min-height: 50px;
+                }
+
+                /* Rock, Paper, Scissors choices */
+                #practice-choices {
+                    display: flex;
+                    justify-content: center;
+                    align-items: flex-start;
+                    gap: 35px;
+                    margin: 25px auto 35px;
+                }
+
+                .practice-choice {
+                    width: 180px;
+                    padding: 10px;
+                    border: 2px solid #cccccc;
+                    border-radius: 10px;
+                    background: #ffffff;
+                    cursor: grab;
+                    user-select: none;
+                    font-size: 20px;
+                    font-weight: bold;
+                }
+
+                .practice-choice img {
+                    max-width: 100%;
+                    height: auto;
+                    pointer-events: none;
+                }
+
+                .practice-choice:active {
+                    cursor: grabbing;
+                }
+
+                /* Countdown and drop box */
+                #practice-selection-area {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    gap: 40px;
+                    margin: 20px auto;
+                }
+
+                #practice-countdown {
+                    width: 150px;
+                    font-size: 48px;
+                    font-weight: bold;
+                }
+
+                #practice-countdown.practice-go {
+                    color: #16803c;
+                }
+
+                #practice-drop-box {
+                    width: 280px;
+                    height: 240px;
+                    border: 3px dashed #888888;
+                    border-radius: 12px;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    background: #f7f7f7;
+                    font-size: 18px;
+                    flex-shrink: 0;
+                }
+
+                #practice-drop-box img {
+                    max-width: 180px;
+                    max-height: 180px;
+                    object-fit: contain;
+                }
+
+                #practice-drop-box.practice-selected {
+                    border-style: solid;
+                    border-color: #4a78a8;
+                    background: #eef5fc;
+                }
+
+                /* Enter instructions */
+                #practice-enter-instruction {
+                    margin: 25px auto;
+                    min-height: 35px;
+                    font-size: 21px;
+                }
+
+                /* Feedback */
+                #practice-feedback {
+                    margin: 25px auto;
+                    padding: 15px;
+                    font-size: 19px;
+                }
+
+                #practice-feedback h3 {
+                    margin-bottom: 10px;
+                }
+
+                /*drag and drop styles */
+                #game-area {
+                display: flex !important;
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+                max-width: 950px;
+                margin: 0 auto;
+                font-family: 'Oxanium', sans-serif;
+                font-weight: 800;
+                }
+
+                #game-title{
+                    margin: 30px 20px 10px 0;
+                    font-size: 48px;
+                    font-weight: 800;
+                    text-align: center;
+                    color: #333
+                }
+
+                #round-feedback{
+                    width: 100%;
+                    max-width: 650px;
+                    min-height: 48px;
+                    margin: 15px 20px auto 10px;
+                    padding: 10px 26px;
+                    box-sizing: border-box !important;
+                    font-family: 'Oxanium', sans-serif;
+                    font-size: 18px;
+                    font-weight: 600;
+                    text-align: center;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 8px;
+                }
+
+                .game-main-row{
+                    display: flex;
+                    flex-direction: row;
+                    flex-wrap: nowrap;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 40px;
+                    margin-top: -40px;
+                    width: 100%;
+                }
+
+                #choices {
+                    display: flex;
+                    flex-direction: column;
+                    width: auto;
+                    margin: 0;
+                    gap: 20px;
+                }
+
+                .choice {
+                    border: 2px solid #333;
+                    border-radius: 10px;
+                    background-color: white;
+                    cursor: grab;
+                    font-size: 20px;
+                    text-align: center;
+                    padding: 6px 12px;
+                }
+
+                .choice img {
+                    display: block;
+                    margin: 0 auto
+                }
+
+                .choice div {
+                    margin-top: 0;
+                    margin-bottom: 5px;
+                    line-height: 1;
+                }
+
+                .choice:active {
+                    cursor: grabbing;
+                }
+
+                #selection-area {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    width: auto;
+                    margin: 20px auto;
+                }
+
+                #countdown {
+                    font-size: 48px;
+                    font-weight: bold;
+                    height: 55px;
+                    margin-bottom: 12px;
+                    color: #333;
+                }
+
+                #drop-box, 
+                #computer-box {
+                    width: 300px;
+                    height: 250px;
+                    border-radius: 15px;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 20px;
+                    box-sizing: border-box;
+                }
+
+                #drop-box {
+                    border: 3px dashed #777;
+                    background-color: #f9f9f9;
+                }
+
+                #drop-box.selected {
+                    border: 3px solid black;
+                }
+
+                #drop-box.locked {
+                    border: 3px solid black;
+                }
+
+                #drop-box.winner {
+                    border: 3px solid green;
+                    background-color: #f1fff7;
+                }
+
+                #drop-box.loser {
+                    border: 3px solid rgb(156, 0, 0);
+                    background-color: #f8b4b4;
+                }
+
+                #drop-box.tie {
+                    border: 4px solid #deb40e;
+                    background-color: #fff4c7;
+                }
+
+                #computer-box {
+                    border: 3px solid black;
+                    background-color: rgb(51, 51, 53);
+                    color: white;
+                }
+                #computer-box.reveal{
+                    border: 3px solid black;
+                    background-color: transparent;
+                }
+
+                #computer-box.winner {
+                    border: 3px solid green;
+                    background-color: #f1fff7;
+                }
+
+                #computer-box.loser {
+                    border: 3px solid rgb(156, 0, 0);
+                    background-color: #f8b4b4;
+                }
+
+                #computer-box.tie {
+                    border: 4px solid #deb40e;
+                    background-color: #fff4c7;
+                }
+
+                #computer-question-mark {
+                    font-size: 120px;
+                    font-weight: bold;
+                    line-height: 1;
+                }
+
+                #computer-box img{
+                    display: block;
+                }
+
+                #enter-instruction {
+                    font-size: 30px;
+                    margin-top: 35px;
+                    text-align: center;
+                    min-height: 24px;
+                }
+
+                /* Countdown's GO state */
+                #countdown.practice-go {
+                    color: green;
+                }
+
+                /*End screen CSS*/
+                #scoreboard{
+                    transition: top 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+                    right 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+                    transform 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+                    width 0.8s ease,
+                    padding 0.8s ease,
+                    background-color 0.8s ease,
+                    box-shadow 0.8s ease;
+                }
+                /*center and enlarge the scoreboard when revealing winner*/ 
+                #scoreboard.summary-mode{
+                    top: 50% !important;
+                    right: 50% !important;
+                    transform: translate(50%, -50%) scale(1.35) !important;
+                    width: 280px !important;
+                    padding: 20px !important;
+                    background-color: #ffffff !important;
+                    border: 3px solid #333 !important;
+                    border-radius: 12px !important;
+                    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.2) !important;
+                    text-align: center;
+                }
+                /* Bonus payout badges inside the centered scoreboard */
+                .earnings-text {
+                    display: inline-block;
+                    margin-top: 4px;
+                    font-size: 20px;
+                    font-weight: 800;
+                    color: #198754; /* Clean green text for earnings */
+                }
+
+                /* Optional neutral color for secondary/opponent text */
+                .earnings-text.secondary {
+                    display: inline-block;
+                    margin-top: 4px;
+                    font-size: 20px;
+                    font-weight: 800;
+                    color: #495057;
+                }
+
+                #match-title, #match-subtitle {
+                    transition: opacity 0.4s ease;
+                }
+
+                /* End screen container & text transitions */
+                #end-screen-wrapper {
+                    text-align: center;
+                    margin-top: 100px;
+                    font-family: 'Oxanium', sans-serif;
+                }
+
+                #match-title, #match-subtitle {
+                    transition: opacity 0.4s ease;
+                }
+
+                /* Continue button styling */
+                #summary-continue-btn {
+                    display: none;
+                    width: 200px;
+                    height: 60px;
+                    font-family: 'Oxanium', sans-serif;
+                    font-size: 22px;
+                    font-weight: 800;
+                    cursor: pointer;
+                    border-radius: 8px;
+                    border: 1px solid #333;
+                    background-color: #f8f9fa;
+                    color: #333;
+                    margin: 300px auto 0 auto;
+                    opacity: 0;
+                    transition: opacity 0.2s ease, background-color 0.2s ease;
+                }
+
+                #summary-continue-btn:hover {
+                    background-color: #e2e6ea;
+                }
+
+                /*chatting css*/
+                /* Chat Container */
+                .chat-window {
+                    width: 100%;
+                    max-width: 480px;
+                    margin: 20px auto;
+                    background: #ffffff;
+                    border: 1px solid #e0e0e0;
+                    border-radius: 16px;
+                    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+                    display: flex;
+                    flex-direction: column;
+                    overflow: hidden;
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                }
+
+                .chat-header {
+                    background: #f8f9fa;
+                    padding: 14px 18px;
+                    border-bottom: 1px solid #eeeeee;
+                    font-size: 15px;
+                    font-weight: 600;
+                    color: #333;
+                    text-align: center;
+                }
+
+                /* Scrollable Message List */
+                .chat-messages {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                    padding: 16px;
+                    min-height: 220px;
+                    max-height: 320px;
+                    overflow-y: auto;
+                    background: #fafafa;
+                }
+
+                /* Chat Bubbles */
+                .chat-bubble {
+                    max-width: 75%;
+                    padding: 10px 14px;
+                    font-size: 14px;
+                    line-height: 1.45;
+                    word-wrap: break-word;
+                }
+
+                .chat-status-bar {
+                    font-size: 12px;
+                    color: #6c757d;
+                    text-align: center;
+                    padding: 6px 0;
+                    background: #f1f3f5;
+                    border-bottom: 1px solid #e9ecef;
+                    font-style: italic;
+                    min-height: 20px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                /* Opponent Message (Left) */
+                .bubble-opponent {
+                    align-self: flex-start;
+                    background: #e9ecef;
+                    color: #212529;
+                    border-radius: 16px 16px 16px 4px;
+                    animation: fadeIn 0.3s ease-in-out;
+                }
+
+                /* Participant Message (Right) */
+                .bubble-user {
+                    align-self: flex-end;
+                    background: #0d6efd;
+                    color: #ffffff;
+                    border-radius: 16px 16px 4px 16px;
+                    animation: fadeIn 0.3s ease-in-out;
+                }
+
+                /* Typing Indicator (Left) */
+                .typing-indicator {
+                    align-self: flex-start;
+                    display: flex;
+                    align-items: center;
+                    gap: 4px;
+                    padding: 10px 14px;
+                    background: #e9ecef;
+                    border-radius: 16px 16px 16px 4px;
+                }
+
+                .typing-dot {
+                    width: 7px;
+                    height: 7px;
+                    background-color: #6c757d;
+                    border-radius: 50%;
+                    animation: typing-anim 1.4s infinite ease-in-out both;
+                }
+
+                .typing-dot:nth-child(1) { animation-delay: 0s; }
+                .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+                .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+                @keyframes typing-anim {
+                    0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+                    40% { transform: scale(1); opacity: 1; }
+                }
+
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(6px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+
+                /* Input Area */
+                .chat-input-area {
+                    display: flex;
+                    gap: 8px;
+                    padding: 12px;
+                    background: #ffffff;
+                    border-top: 1px solid #eeeeee;
+                }
+
+                .chat-input-area input {
+                    flex: 1;
+                    padding: 10px 14px;
+                    border: 1px solid #ced4da;
+                    border-radius: 20px;
+                    font-size: 14px;
+                    outline: none;
+                }
+
+                .chat-input-area input:focus {
+                    border-color: #0d6efd;
+                }
+
+                .chat-input-area button {
+                    padding: 8px 18px;
+                    background: #0d6efd;
+                    color: white;
+                    border: none;
+                    border-radius: 20px;
+                    font-weight: 600;
+                    cursor: pointer;
+                }
+
+                .chat-input-area button:disabled {
+                    background: #adb5bd;
+                    cursor: not-allowed;
+                }
+
+                /* Widen the survey page */
+                .jspsych-content {
+                    max-width: 1000px !important;
+                    width: 95% !important;
+                }
+
+                /* Widen the Likert response list */
+                .jspsych-survey-likert-opts {
+                    width: 100% !important;
+                    margin: 15px auto !important;
+                }
+
+                /* Give the seven options equal widths */
+                .jspsych-survey-likert-opts li {
+                    width: 14.285% !important;
+                    padding: 0 4px !important;
+                    box-sizing: border-box !important;
+                }
+
+                /* Make labels readable */
+                .jspsych-survey-likert-opts li p {
+                    font-size: 17px !important;
+                    line-height: 1.25 !important;
+                    white-space: normal !important;
+                }
+
+                /* Enlarge radio buttons */
+                .jspsych-survey-likert-opts input[type="radio"] {
+                    position: relative;
+                    top: -2px;
+                    transform: scale(1.5);
+                    margin: 0 0 12px 0;
+                    vertical-align: middle;
+                }
+        </style>
+    </body>
+<script>
+    {/*
+    We are running a rock, paper, scissors game between a participant and a computer opponent.
+    3 (Outcome: Win, Lose, Tie) x 3 (Information: Luck, Strategy/Skill, None) between-subjects design
+
+    Outline: 
+    [x] preload images 
+    [] consent 
+    [x] welcome precheck participant's computer speed 
+    [x] participant and computer name 
+    [x] practice rounds --> make participants drag response and press enter quickly at "GO"
+    [x] main game --> need to edit the opponent code 
+    [x] post game chat --> information condition manipulation
+    [x] filler task 
+    [x] DV measures 
+    [x] Demos
+    [x] Funnel Questions
+    [x] Save Data
+    [] Debrief and redirect to completion page
+
+    To Do: 
+    [x] participant checks --> (1) Full Screen for games [X] and (2) Browser check 
+    [X] figure out what to do if participant doesn't press enter or select a choice in time
+   */}
+
+   // experiment set up folder: init jsPsych, preload images, set up basic var (participant name, prolific info, participant_images, computer_images, choices)
+   {
+        var jsPsych = initJsPsych();
+
+        var timeline = [];
+        var participantName = "You";
+
+        // Generate random subject ID for data filename
+        const subject_id = jsPsych.randomization.randomID(10);
+        jsPsych.data.addProperties({ subject_id: subject_id });
+        const filename = `${subject_id}.csv`;
+
+        var experiment_date = new Date().toISOString().slice(0,10);
+        jsPsych.data.addProperties({
+        experiment_date: experiment_date
+        });
+
+        // capture info from Prolific
+        //var subject_id = jsPsych.data.getURLVariable('PROLIFIC_PID'); do not capture prolific PID yet
+        var prolific_id = jsPsych.data.getURLVariable('PROLIFIC_PID') || null; 
+        var study_id = jsPsych.data.getURLVariable('STUDY_ID') || null;
+        var session_id = jsPsych.data.getURLVariable('SESSION_ID') || null;
+
+        var prolific_id_last4 = prolific_id ? prolific_id.slice(-4) : "NA";
+
+        jsPsych.data.addProperties({
+            prolific_id_last4: prolific_id_last4,
+            study_id: study_id,
+            session_id: session_id,
+            study: 'RPS_envy_ownership',
+            version: 'PilotA'
+        });
+        // --- Preload images ---
+        var preload = {
+            type: jsPsychPreload,
+            images: [
+            //do I want to have different RPS images?
+            //do we want "avatars" for the participant and computer to increase the social presence of the game?
+            "exp_code/Images/Rock_Computer.png",
+            "exp_code/Images/Rock_Participant.png",
+            "exp_code/Images/Paper_Computer.png",
+            "exp_code/Images/Paper_Participant.png",
+            "exp_code/Images/Scissors_Computer.png",
+            "exp_code/Images/Scissors_Participant.png",
+            "exp_code/Images/Loading_icon.gif", 
+            ]
+        };
+        timeline.push(preload); 
+
+         // --- Game setup ---
+        var participant_images = {
+            'rock': 'exp_code/Images/Rock_Participant.png',
+            'paper': 'exp_code/Images/Paper_Participant.png',
+            'scissors': 'exp_code/Images/Scissors_Participant.png'
+        };
+
+        var computer_images = {
+            'rock': 'exp_code/Images/Rock_Computer.png',
+            'paper': 'exp_code/Images/Paper_Computer.png',
+            'scissors': 'exp_code/Images/Scissors_Computer.png'
+        };
+
+        var choices = ['rock', 'paper', 'scissors'];
+        }
+   // consent 
+    var consent ={
+    type: jsPsychHtmlButtonResponse,
+    stimulus: `
+    <p style = "text-align: start; margin-right: 50px; margin-left: 50px"> INSERT THE CONSENT FORM TEXT HERE (TO DO)</p>`,
+    choices: ['I Consent', 'I Do Not Consent'],
+    data: { task: 'consent' },
+    on_finish: function(data){
+      if(data.response === 1){
+        jsPsych.data.addProperties({ reason: "participant_declined_consent" }); //log reason for non-consent
+        
+        document.body.innerHTML = `
+        <div style="text-align:center; margin-top:100px;">
+          <h3>You have chosen not to participate in this study.</h3>
+          <p>Thank you for your time. You may now close this window.</p>
+          <p>Or, you will be automatically redirected in 5 seconds.</p>
+        </div>
+      `;
+
+      // delay redirect
+      setTimeout(function() {
+        window.location.href = "https://irb.ucsd.edu/participants/index.html";
+      }, 5000);
+
+      // return false prevents jsPsych from continuing the timeline
+      return false;
+            }
+        }
+    };
+    //timeline.push(consent);
+    
+    // welcome to the experiment screen 
+    // TO DO: (1) check browser speed and (2) uncomment out welcome screen 
+    var welcome = {
+    type: window.jsPsychHtmlButtonResponse,
+    choices: ["Continue"],
+    stimulus: `<p>
+        Thank you for choosing to participate in this study! We are investigating how making decisions under strict time pressures relates to performance on other cognitive tasks.<br>
+        The study has three parts. 
+        </p>
+        <p style="line-height:2">
+        First, you will be paired with another participant online to play a game of Rock, Paper, Scissors under strict countdown timers.<br>
+        Nexxt, you will have a brief window to reflect on the game and your decision strategies with your paired opponent.<br>
+        Finally, you'll complete a word-classification task on your own. This task will not be timed, so you can work at your own pace. 
+        </p> 
+
+        <p>Click <i>Continue</i> when you are ready to begin.</p>`
+    };
+    //timeline.push(welcome); //add some call function for vsync_rate as if we are checking for a certain rate 
+    
+    //computer name (random assignment to popular name)
+    var computerName = 
+            jsPsych.randomization.sampleWithoutReplacement(
+            ['Maria', 'James', 'Andre', 'Rohan', 'Zoe'], 1)[0];
+    document.getElementById("opponent-label").textContent = computerName;
+
+    //fullscreen 
+    /*
+    timeline.push({
+        type: jsPsychFullscreen, 
+        fullscreen_mode: true
+    });*/ 
+
+    //record browser interactions/fullscreen minimizations --> need to add this to data saved 
+    function summarizeBrowserInteractions() {
+        const events = jsPsych.data.getInteractionData().values();
+        return {
+            browser_blur_count:
+                events.filter(e => e.type === "blur").length,
+            browser_focus_count:
+                events.filter(e => e.type === "focus").length,
+            fullscreen_exit_count:
+                events.filter(e => e.type === "fullscreenexit").length,
+            fullscreen_enter_count:
+                events.filter(e => e.type === "fullscreenenter").length,
+            browser_interaction_events: JSON.stringify(events)
+        };
+    };
+
+    //Practice Round => Instructions and Game 
+    //instructions
+    var rps_instructions = {
+        type: jsPsychInstructions,
+        pages: [
+            // Page 1: Intro
+            `
+            <div class="rps-instructions">
+                <h2>Rock-Paper-Scissors Task</h2>
+
+                <p>In this study, you will play four rounds of
+                rock-paper-scissors with another participant.</p>
+
+                <p>Please read the following instructions carefully before beginning.<br>
+                To make sure all participants have an equal understanding of the game, 
+                you will be asked to answer a few questions about the rules before proceeding.</p>
+            </div>
+            `,
+
+            // Page 2: How to play
+            `
+            <div class="rps-instructions">
+                <h2>How to Play</h2>
+
+                <p>Each round, you and the other player will each choose rock, paper, or scissors.</p>
+
+                <ul style="text-align:start; margin-left: 20px; margin-bottom: 20px">
+                    <li>Rock beats scissors.</li>
+                    <li>Scissors beats paper.</li>
+                    <li>Paper beats rock.</li>
+                    <li>If both players choose the same option, the round is a tie.</li>
+                </ul>
+            </div>
+            `,
+
+            // Page 3: Selecting a choice
+            `
+            <div class="rps-instructions">
+                <h2>Selecting Your Choice</h2>
+
+                <p>At the beginning of each round, a countdown
+                will appear on the screen.</p>
+
+                <p>While the countdown is running, drag your chosen
+                option into your box. You can change your selection
+                until the countdown ends.</p>
+
+                <p><strong>When "GO!" appears, your selection becomes
+                fixed and cannot be changed.</strong></p>
+
+                <p>Make sure your choice is in the box before
+                the countdown ends.</p>
+            </div>
+            `,
+
+            // Page 4: Locking in a choice
+            `
+            <div class="rps-instructions">
+                <h2>Locking In Your Choice</h2>
+
+                <p>When "GO!" appears, press <strong>Enter</strong>
+                or <strong>Space</strong> as quickly as possible
+                to lock in your choice.</p>
+
+                <p>You must respond within <strong>3 seconds</strong>.
+                If you do not respond in time, your selection will not count, and you will
+                automatically lose the round.</p>
+
+                <p>Once both choices are locked in or the time runs out, the outcome of the round will be displayed.</p>
+
+                <p>Your selection cannot be changed after "Go!", even before you lock it in.</p>
+            </div>
+            `,
+
+            // Page 5: Game structure
+            `
+            <div class="rps-instructions">
+                    <h2>Round Outcomes</h2>
+
+                    <p>After both players have locked in their choices,
+                    the choices will be revealed and the outcome of
+                    the round will be displayed.</p>
+
+                    <p>After viewing the result, you will proceed
+                    to the next round.</p>
+            </div>
+            `,
+            // Page 6: Reward structure
+            `
+            <div class="rps-instructions">
+                <h2>Reward Structure</h2>
+                <p>To incentivize performance, you will receive a bonus based on your performance in the game. You and your opponent are playing for a pool of $4.</p>
+                <p>The share of the pool you receive will be calculated based on the number of rounds you win out of the four rounds played.<br>
+                The player who wins the most rounds wins the match. If both players win the same number of rounds, the match is a tie.</p>
+                <ol style="text-align:start; margin-left: 250px; margin-bottom: 20px">
+                    <li>Match Winner: $3 bonus</li>
+                    <li>Match Loser: $1 bonus</li>
+                    <li>Match Tie: Both players will receive a $2 bonus</li>
+                </ol>
+                <p><strong>The more rounds you win, the higher your bonus will be.</strong></p>
+            </div>
+            `,
+            // Page 7: Comprehension check reminder
+            `
+            <div class="rps-instructions">
+                <h2>Before You Begin</h2>
+
+                <p>Before starting the game, please make sure
+                you understand the instructions.</p>
+
+                <p>On the next screen, you will answer a few
+                questions about how to play.</p>
+
+                <p>After completing the questions, you will have an opportunity to practice before playing against another participant.</p>
+            </div>
+            `
+        ],
+        show_clickable_nav: true,
+        allow_keys: false,
+        allow_backward: true,
+
+        button_label_previous: "Back",
+        button_label_next: "Next",
+        show_page_number: true,
+
+        data: {
+            task: "rps_instructions"
+        }
+    }; 
+    //timeline.push(rps_instructions);
+    //comprehension check 
+    var instructions_comprehension_check = {
+      type: jsPsychSurveyMultiChoice, 
+      preamble:"",
+      questions: [
+        {
+          prompt: "When can you change your selection?",
+          options: jsPsych.randomization.shuffle([
+            "Only after “GO!” appears.",
+            "While the countdown is running.",
+            "At any point during the round."
+          ]),
+          required: true,
+          horizontal: false, 
+          name: "comprehension1"
+        },
+        {
+          prompt: "What should you do when “GO!” appears?",
+          options: jsPsych.randomization.shuffle([
+            "Drag your choice into the box.",
+            "Press Enter or Space to lock in your choice.",
+            "Wait until the other participant's choice appears."
+          ]),
+          required: true,
+          horizontal: false, 
+          name: "comprehension2"
+        },
+        {
+          prompt: "What happens if you do not press Enter or Space within 3 seconds?",
+          options: jsPsych.randomization.shuffle([
+            "The round is paused.",
+            "I automatically lose the round.",
+            "I can select a new option."
+          ]),
+          required: true,
+          horizontal: false, 
+          name: "comprehension3"
+        },
+        {
+          prompt: "How much do you receive if you win best out of four?",
+          options: jsPsych.randomization.shuffle([
+            "XXX.",
+            "XXX.",
+            "XXX."
+          ]),
+          required: true,
+          horizontal: false, 
+          name: "comprehension5"
+        },
+        ],
+        button_label: "Submit", 
+        randomize_question_order: false
+    }; 
+    //timeline.push(instructions_comprehension_check);
+    //TO DO: if do poorly on comprehension check, make them re-read the instructions 
+
+    //practice round intro --> want to say something like getting used to the speed needed 
+    var practice_intro = {
+        type: window. jsPsychHtmlButtonResponse, 
+        choices: ["Begin Practicing"], 
+        stimulus: `
+        <h2>Practice Rounds</h2>
+        <p>
+            Before playing against another participant, you will complete <strong>three practice rounds</strong> on your own. 
+        </p>
+        <p>
+            Use these rounds to get comfortable with the timing of selecting and locking in your choice
+        </p>    
+            <p><br>
+            To start, press Begin. 
+            </p>`
+    };
+    //timeline.push(practice_intro);
+    
+    //practice round game code
+    const PRACTICE_MAX_RESPONSE_TIME = 3000; //allows for 3 seconds after "Go"
+
+    // Create one practice round
+    function createRPSPracticeRound() {
+    return {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: `
+            <div id="practice-game-area">
+                <h2 id="practice-title">Practice Round</h2>
+
+                <p id="practice-instructions">
+                    Drag Rock, Paper, or Scissors into the box below before the countdown ends.
+                </p>
+
+                <!-- Replace practice-instructions with practice-feedback when game is over-->
+
+                <h2 id="practice-feedback" style="display: none; margin: -40px";></h2>
+
+                <!-- Participant choices -->
+                <div id="practice-choices">
+
+                    <div class="practice-choice"
+                         draggable="true"
+                         data-choice="rock">
+                        <img src="${participant_images["rock"]}" alt="Rock" width="200">
+                        <div>Rock</div>
+                    </div>
+
+                    <div class="practice-choice"
+                         draggable="true"
+                         data-choice="paper">
+                        <img src="${participant_images["paper"]}" alt="Paper" width="200">
+                        <div>Paper</div>
+                    </div>
+
+                    <div class="practice-choice"
+                         draggable="true"
+                         data-choice="scissors">
+                        <img src="${participant_images["scissors"]}" alt="Scissors" width="200">
+                        <div>Scissors</div>
+                    </div>
+
+                </div>
+
+                <!-- Countdown and selection area -->
+                <div id="practice-selection-area">
+
+                    <div id="practice-countdown">3</div>
+
+                    <div id="practice-drop-box">
+                        <p>Drag your choice here</p>
+                    </div>
+
+                </div>
+
+                <div id="practice-enter-instruction" style="margin: 10px;">
+                    Select your choice before GO!
+                </div>
+
+                <!-- Feedback appears after the response -->
+                <!-- <div id="practice-feedback"> -->
+                </div>
+                <button id="practice-continue" 
+                style ="display:none; 
+                        width: 200px; 
+                        height: 60px;
+                        font-size: 24px;
+                        cursor: pointer; 
+                        position: absolute; 
+                        left: 42%">
+                    Continue
+                </button>
+
+            </div>
+        `,
+
+        // We'll handle Enter and Spacebar ourselves.
+        choices: "NO_KEYS",
+
+        data: {
+            task: "rps_practice"
+        },
+
+        on_load: function() {
+            // Game elements
+            const countdown =
+                document.getElementById("practice-countdown");
+
+            const choices =
+                document.querySelectorAll(".practice-choice");
+
+            const dropBox =
+                document.getElementById("practice-drop-box");
+
+            const title = document.getElementById("practice-title");
+
+            const feedback =
+                document.getElementById("practice-feedback");
+
+            const instructions =
+                document.getElementById("practice-instructions");
+
+            const continueButton = 
+                document.getElementById("practice-continue");
+
+            // Trial state
+            let selectedChoice = null;
+            let startTime = null;
+            let participantRT = null;
+            let lockedIn = false;
+            let trialEnded = false;
+            let countdownInterval = null;
+            let responseTimeout = null;
+
+            // Drag and Drop Code 
+
+            choices.forEach(choice => {
+
+                choice.addEventListener("dragstart", function(event) {
+
+                    if (lockedIn || trialEnded) {
+                        event.preventDefault();
+                        return;
+                    }
+
+                    event.dataTransfer.setData(
+                        "text/plain",
+                        choice.dataset.choice
+                    );
+                });
+
+            });
+
+            dropBox.addEventListener("dragover", function(event) {
+
+                if (!lockedIn && !trialEnded) {
+                    event.preventDefault();
+                }
+
+            });
+
+            dropBox.addEventListener("drop", function(event) {
+
+                event.preventDefault();
+
+                if (lockedIn || trialEnded) {
+                    return;
+                }
+
+                const choice =
+                    event.dataTransfer.getData("text/plain");
+
+                // Only accept valid RPS choices
+                if (!["rock", "paper", "scissors"].includes(choice)) {
+                    return;
+                }
+
+                selectedChoice = choice;
+
+                // Show the selected image in the drop box
+                dropBox.innerHTML = `
+                    <img
+                        src="${participant_images[choice]}"
+                        alt="${choice}"
+                        width="200">
+                    <p>${choice.charAt(0).toUpperCase()
+                        + choice.slice(1)} selected</p>
+                `;
+
+                dropBox.classList.add("practice-selected");
+
+                
+            });
+
+            // Countdown Code: 3 -> 2 -> 1 -> GO!
+
+            let count = 3;
+            countdown.textContent = "3";
+
+            countdownInterval = setInterval(function() {
+                count--;
+
+                if (count > 0) {
+                    countdown.textContent = count;
+                } else {
+                    clearInterval(countdownInterval);
+                    countdownInterval = null;
+
+                    // Show GO and start reaction-time clock
+                    countdown.textContent = "GO!";
+                    countdown.classList.add("practice-go");
+
+                    startTime = performance.now();
+
+                    // Lock the selection at GO
+                    lockedIn = true;
+
+                    choices.forEach(choice => { 
+                        choice.setAttribute("draggable", "false");
+                    }); //not able to drag in another selection once hit "Go"
+
+                    
+
+                    
+
+                    // If no selection was made, the participant
+                    // can still respond, but will receive feedback.
+                    responseTimeout = setTimeout(function() {
+                        finishPracticeRound(true);
+                    }, PRACTICE_MAX_RESPONSE_TIME);
+                }
+
+            }, 1500); // 1.5 seconds per countdown number
+
+            // Enter/SPACE response and timeout handling
+
+            function handleEnter(event) { 
+                //handleEnter function include spacebar as an accepted key 
+                if (event.key !== "Enter" && event.key !== " ") {
+                    return;
+                }
+
+                // Do not accept Enter before GO
+                if (startTime === null || trialEnded) {
+                    return;
+                }
+
+                event.preventDefault();
+
+                participantRT = performance.now() - startTime;
+
+                finishPracticeRound(false);
+            }
+
+            function finishPracticeRound(timedOut) {
+
+                if (trialEnded) {
+                    return;
+                }
+
+                trialEnded = true;
+
+                // Stop timers
+                if (countdownInterval !== null) {
+                    clearInterval(countdownInterval);
+                }
+
+                if (responseTimeout !== null) {
+                    clearTimeout(responseTimeout);
+                }
+
+                // Stop listening for Enter
+                document.removeEventListener(
+                    "keydown",
+                    handleEnter
+                );
+
+                // Hide countdown and show feedback
+                countdown.classList.remove("practice-go");
+
+                feedback.style.display = "block";
+
+                if (timedOut) {
+                    
+                    feedback.innerHTML = `
+                        <h2>Too slow!</h2>
+                        <p>
+                            Try to press ENTER or SPACE within 3 seconds 
+                            after GO! appears.
+                        </p>
+                    `;
+
+                } else if (selectedChoice === null) {
+
+                    feedback.innerHTML = `
+                        <h2>Remember to select a choice!</h2>
+                        <p>
+                            Drag Rock, Paper, or Scissors into
+                            the box before the countdown ends.
+                        </p>
+                    `;
+
+                } else {
+
+                    feedback.innerHTML = `
+                        <h2 style="margin-top: -10px">Good job!</h2>
+                        <p>
+                            You responded in
+                            <strong>${Math.round(participantRT)} ms</strong>.
+                        </p>
+                        <p style="margin-top: -10px">
+                            In the actual game, keep your choice
+                            in the box and press ENTER or SPACE as soon
+                            as GO! appears.
+                        </p>
+                    `;
+
+                }
+
+                // Hide the original title and instructions
+                title.style.display = "none";
+                instructions.style.display = "none";
+
+                // Show feedback in their place
+                feedback.style.display = "block";
+
+                // Show the Continue button
+                continueButton.style.display = "block";
+
+                // Save practice data
+                jsPsych.data.addDataToLastTrial({
+
+                    selected_choice: selectedChoice,
+                    participant_rt: timedOut
+                        ? null
+                        : Math.round(participantRT),
+
+                    timed_out: timedOut,
+                    selected_before_go: selectedChoice !== null
+
+                });
+            }
+
+            // Advance after feedback (pressing spacebar for game also advances, so need to change this)
+
+            continueButton.addEventListener("click", function() {
+            if (!trialEnded) {
+                return;
+            }
+
+            jsPsych.finishTrial();
+            });
+
+            // Activate keyboard listeners
+            document.addEventListener("keydown", handleEnter); //reminder handleEnter is for locking in answer --> clicking enter or space
+
+                }
+            };
+        };
+    /*
+       timeline.push({
+            timeline: [
+                //three practice rounds, but can add more by pasting more createRPSPracticeRound()
+                createRPSPracticeRound(),
+                createRPSPracticeRound(),
+                createRPSPracticeRound(), 
+            ]
+        });*/
+    
+    //main game logic 
+    //instructions
+        // put participant in conditions 
+        function determineWinner(player, computer) {
+        if (player === computer) return "tie";
+        if (
+        (player === "rock" && computer === "scissors") ||
+        (player === "paper" && computer === "rock") ||
+        (player === "scissors" && computer === "paper")
+        ) return "player";
+        return "computer";
+        };
+
+        // assign conditions: 5 possible conditions: 4v0, 3v1, 2v2, 1v3, 0v4 --> turn into win/lose/tie conditions
+        var random_condition = 
+            jsPsych.randomization.sampleWithoutReplacement(
+            ['4v0', '3v1', '2v2', '1v3', '0v4'], 1)[0];
+        
+        var participant_outcome; 
+        
+            if (random_condition === '4v0' || random_condition === '3v1') {
+                participant_outcome = 'win';
+            } else if (random_condition === '2v2') {
+                participant_outcome = 'tie';
+            } else {
+                participant_outcome = 'lose';
+            };
+
+            jsPsych.data.addProperties({
+                random_condition: random_condition,
+                participant_outcome: participant_outcome
+            });
+
+        const wins_by_condition = {
+                '4v0': 4,
+                '3v1': 3,
+                '2v2': 2,
+                '1v3': 1,
+                '0v4': 0
+        };
+
+        const n_wins = wins_by_condition[random_condition]; // n_wins is the number of wins for the participant in the 4 rounds of RPS (e.g., 4v0 = 4 wins, 3v1 = 3 wins, etc.)
+
+        // predetermine the outcome schedule based on the number of wins for the participant
+            let outcome_schedule = [
+                ...Array(n_wins).fill("player"),
+                ...Array(4 - n_wins).fill("computer")
+            ];
+
+        outcome_schedule = jsPsych.randomization.shuffle(outcome_schedule);
+    
+        //get the computer behavior based on (1) player choice and (2) outcome condition 
+        function getComputerChoice(playerChoice, outcome) {
+        //tie 
+        if (outcome === "tie") {
+            return playerChoice;}
+        //win 
+        if (outcome === "player") {
+            if (playerChoice === "rock") {return "scissors";}
+            if (playerChoice === "paper") {return "rock";}
+            if (playerChoice === "scissors") {return "paper";}
+        }
+        //lose
+        if (outcome === "computer") {
+            if (playerChoice === "rock") {return "paper";}
+            if (playerChoice === "paper") {return "scissors";}
+            if (playerChoice === "scissors") {return "rock";}
+        }
+        } 
+        //TO DO: make sure that this is the correct distribution for RT 
+        //generate the computer RT --> mechanism is to reveal as soon as "opponent" presses enter. want this to seem naturalistic 
+        function generateComputerRT() {
+            // Typical RT under low cognitive load
+            const medianRT = 475;
+            const sigma = 0.25;
+
+            // Generate a standard normal random value
+            const u1 = Math.random();
+            const u2 = Math.random();
+
+            const z = Math.sqrt(-2 * Math.log(u1)) *
+                    Math.cos(2 * Math.PI * u2);
+
+            // Generate log-normal RT
+            let rt = medianRT * Math.exp(sigma * z);
+
+            // Plausible human RT boundaries
+            rt = Math.max(250, Math.min(rt, 1200));
+
+            return Math.round(rt);
+        }
+
+        // max RT time ==> Participant has 3 seconds to lock in answer (same as practice)
+        const MAX_RESPONSE_TIME = 3000;
+        const MAX_JITTER_TIME = 4500; //4.5 seconds max delay 
+        const MIN_JITTER_TIME = 500; // .5 second delay
+        
+        //current round initializer 
+        let current_round = 0; 
+        let player_wins = 0;
+        let computer_wins = 0;
+        let ties = 0;
+        let participant_flagged = false; //flag for if participant is not responding in time (selection or locking in answer)
+        let participant_outcome_issue = false; //flag if participant outcome is not consistent with the predetermined outcome schedule (e.g., participant should be overall winner, but they lose more rounds than they win or should be tied but they lose more rounds than they win)
+    
+        var main_game_intro = {
+            type: jsPsychSurveyText,
+            preamble: `
+                <h2>Time to Play</h2>
+                <p>
+                You are now ready to play <strong>four rounds</strong> of Rock-Paper-Scissors against another participant.</p>
+                
+                <p>Remember: Drag you choice into the box to make your choice during the countdown. Once "GO!" appears, your selection becomes fixed.<br>
+                    Press <strong>Enter</strong> or <strong>Space</strong> within 3 seconds to lock in your choice.</p>
+
+                <h3 style="margin-top:40px">Bonus Payment</h3>
+                <p>The player who wins the most rounds will receive a <strong>$3 bonus</strong>, while the
+                other player will receive a <strong>$1 bonus</strong>. If the match is tied, both players will receive
+                a <strong>$2 bonus</strong>.</p>
+                
+                <p> 
+                First, enter a screen name to use during the game. You will then proceed to the participant pairing screen. <br>
+                    <i>If you use a pseudonym, please choose something respectful to the other player.</i>
+                </p>`, 
+            questions: [{prompt: "", 
+                        placeholder: "Screen name",
+                        name: "participant_name", 
+                        required: true
+            }], 
+            button_label: "Begin Game", 
+            on_finish:function(data){
+                // Extract, trim, and apply fallback name
+                const rawInput = data.response && data.response.participant_name;
+                participantName = (rawInput && rawInput.trim() !== "") ? rawInput.trim() : "You";
+
+                // Save to global jsPsych data output
+                jsPsych.data.addProperties({ participant_name: participantName });
+
+                // Safely update the scoreboard DOM label if it exists
+                const labelElem = document.getElementById("participant-label");
+                if (labelElem) {
+                    labelElem.textContent = participantName;
+                }
+            }
+        };
+        //timeline.push(main_game_intro);
+        //var participantName = "Jada";
+        document.getElementById("participant-label").textContent = participantName;
+        var pairing_duration = (Math.random() * (30 - 25 + 1) + 25) * 1000; //25-30
+
+        var pairing_screen = {
+            type: jsPsychHtmlKeyboardResponse,
+            stimulus: `
+                <div id="pairing-screen">
+                    <h2>Pairing</h2>
+                    <p id="connection-status" style="z-index: 999;">
+                        We are currently trying to pair you with another participant. Please wait patiently to be matched. This may take a few minutes.
+                        <br>Please do NOT minimize this window or navigate to another page.
+                    </p>
+                    <img id = "loading-icon" src="exp_code/Images/Loading_icon.gif"
+                        alt="Loading"
+                        width="200"
+                        style="z-index: 50">
+                    <p id="waiting-message">Waiting for 1 participant to join.</p>
+                </div>
+            `,
+            choices: "NO_KEYS",
+            trial_duration: pairing_duration, // 25-30 seconds total
+            on_load: function() {
+                setTimeout(function() {
+                    var status = document.getElementById("connection-status");
+                    var loadingIcon = document.getElementById("loading-icon");
+                    var waitingMessage = document.getElementById("waiting-message");
+                    if (status) {
+                        status.textContent = `You have been paired with ${computerName}. Game will begin shortly.`;
+                        loadingIcon.style.display = "none"; // Hide the loading icon
+                        waitingMessage.style.display = "none"; // Hide the waiting message
+                    }
+                }, pairing_duration - 5000); // change after 20-25 seconds (depending on the pairing_duration, always 5s less)
+            },
+
+            data: {
+                task: "pairing_screen"
+            }
+        };
+        //timeline.push(pairing_screen);
+
+        //code for the main game starts here --> 
+        function createRPSRound() {
+            return {
+                type: jsPsychHtmlKeyboardResponse,
+                stimulus: function() {
+                    return `
+                    <div id="game-area">
+                        <!-- Row Container (choices on the left, selection boxes on the right) -->
+                        <div class="game-main-row">
+                            <!--Left (choices) -->
+                                <div id="choices">
+                                    <div class="choice"
+                                        draggable="true"
+                                        data-choice="rock">
+                                        <img src="${participant_images["rock"]}"
+                                            alt="Rock" width="120">
+                                        <div>Rock</div>
+                                    </div>
+
+                                    <div class="choice"
+                                        draggable="true"
+                                        data-choice="paper">
+                                        <img src="${participant_images["paper"]}"
+                                            alt="Paper" width="120">
+                                        <div>Paper</div>
+                                    </div>
+
+                                    <div class="choice"
+                                        draggable="true"
+                                        data-choice="scissors">
+                                        <img src="${participant_images["scissors"]}"
+                                            alt="Scissors" width="120">
+                                        <div>Scissors</div>
+                                    </div>
+                                </div>
+                        <!-- GAME AREA -->
+                        <div id="selection-area">
+                            
+                            <h2 id="game-title">Rock, Paper, Scissors</h2>
+
+                            <!-- GAME INSTRUCTIONS and FEEDBACK -->
+                            <div id="round-feedback">
+                                Round ${current_round + 1} of 4: Drag your choice into the box before the countdown ends.
+                            </div>
+
+                            <div id="countdown">3</div>
+
+                            <div style="display: flex; flex-direction: row; align-items: center; gap: 20px;">
+
+                                <!-- PARTICIPANT -->
+                                <div id="drop-box"">
+                                    <p style="margin: 0; color: #6c757d; font-size: 14px;">Drag your choice here</p>
+                                </div>
+
+                                <div style="font-size: 24px; font-weight: bold; color: #333;">VS</div>
+
+                                <!-- OPPONENT -->
+                                <div id="computer-box">
+                                    <div id="computer-question-mark">?</div>
+                                </div>
+                        </div>
+
+                        <div id = "enter-instruction">
+                            Select your choice before GO!
+                        </div>
+                        <!--continue button-->
+                        <button id="continue-button"
+                            style="
+                                display: none;
+                                position: absolute;
+                                width: 200px;
+                                height: 60px;
+                                font-size: 22px;
+                                cursor: pointer;
+                                border-radius: 8px; 
+                                bottom: 15%;
+                                transition: opacity 0.2s;
+                                margin-top: 20px;
+                                border-width: 1px;
+                                
+                            ">
+                        Continue
+                        </button>
+                        </div>
+                    </div>
+                `;
+                },
+                choices: "NO_KEYS",
+                data: {
+                    task: "rps_main"
+                },
+
+                on_load: function() {
+
+                    // Show scoreboard during the main game
+                    document.getElementById("scoreboard").style.display = "block";
+
+                    // Game elements
+                    const countdown = document.getElementById("countdown");
+                    const choices = document.querySelectorAll(".choice");
+                    const dropBox = document.getElementById("drop-box");
+                    const computerBox = document.getElementById("computer-box");
+                    const enterInstruction = document.getElementById("enter-instruction");
+                    const title = document.getElementById("game-title");
+                    const feedback = document.getElementById("round-feedback");
+                    const continueButton = document.getElementById("continue-button");
+
+                    // Round state
+                    let selectedChoice = null;
+                    let startTime = null;
+                    let participantResponded = false;
+                    let lockedIn = false;
+
+                    let computerLockedIn = false;
+                    let computerChoice = null;
+                    let computerRT = null;
+
+                    let participantRT = null;
+                    let timeoutRT = null;
+
+                    let continueReady = false;
+                    let trialEnded = false;
+
+                    // Timer IDs
+                    let countdownInterval = null;
+                    let computerLockTimeout = null;
+                    let participantTimeout = null;
+                    let syncRevealTimeout = null;
+                    let continueTimeout = null;
+
+                    // Predetermined outcome for this round
+                    const outcome = outcome_schedule[current_round];
+
+                    // DRAG AND DROP FUNCTION
+                    choices.forEach(choice => {
+
+                        choice.addEventListener("dragstart", function(event) {
+
+                            if (lockedIn || trialEnded) {
+                                event.preventDefault();
+                                return;
+                            }
+
+                            event.dataTransfer.setData(
+                                "text/plain",
+                                choice.dataset.choice
+                            );
+                        });
+                    });
+
+                    dropBox.addEventListener("dragover", function(event) {
+
+                        if (!lockedIn && !trialEnded) {
+                            event.preventDefault();
+                        }
+                    });
+
+                    dropBox.addEventListener("drop", function(event) {
+
+                        event.preventDefault();
+
+                        if (lockedIn || trialEnded) {
+                            return;
+                        }
+
+                        const choice = event.dataTransfer.getData("text/plain");
+
+                        if (!["rock", "paper", "scissors"].includes(choice)) {
+                            return;
+                        }
+
+                        selectedChoice = choice;
+
+                        dropBox.innerHTML = `
+                            <img src="${participant_images[choice]}"
+                                alt="${choice}" width="200">
+                            <p>${choice.charAt(0).toUpperCase()
+                                + choice.slice(1)} selected</p>
+                        `;
+
+                        dropBox.classList.add("selected");
+                        enterInstruction.textContent = "Your choice is ready. Wait for GO!";
+                    });
+
+                    // COUNTDOWN: 3 -> 2 -> 1 -> GO!
+                    let count = 3;
+                    countdown.textContent = "3";
+
+                    countdownInterval = setInterval(function() {
+                        count--;
+
+                        if (count > 0) {
+                            countdown.textContent = count;
+                            return;
+                        }
+
+                        clearInterval(countdownInterval);
+                        countdownInterval = null;
+
+                        countdown.textContent = "GO!";
+                        countdown.classList.add("practice-go");
+
+                        // Start participant RT clock
+                        startTime = performance.now();
+
+                        // Lock the participant's selection
+                        lockedIn = true;
+
+                        choices.forEach(choice => {
+                            choice.setAttribute("draggable", "false");
+                            choice.style.cursor = "default";
+                        });
+
+                        enterInstruction.innerHTML = "<strong>Press ENTER or SPACE to play your choice.</strong>";
+                        // OPPONENT STARTS RESPONDING (start RT)
+
+                        computerRT = generateComputerRT();
+
+                        computerRevealTimeout = setTimeout(
+                            handleComputerLockIn,
+                            computerRT
+                        );
+
+                        // PARTICIPANT RESPONSE DEADLINE (check deadline time)
+
+                        participantTimeout = setTimeout(
+                            handleParticipantTimeout,
+                            MAX_RESPONSE_TIME
+                        );
+
+                    }, 1500); // 1.5 seconds per countdown number
+
+                    // Opponent's choice locked in
+                    function handleComputerLockIn(){
+                        if(trialEnded || computerLockedIn) return;
+
+                        computerLockedIn = true; 
+
+                        //Display "Locked In!" in computer box
+                        computerBox.innerHTML = `
+                        <div id="computer-question-mark" style = "font-size: 36px; font-weight: bold"></div>
+                        <p style="margin-top: 5px; font-weight: bold;">Locked In!</p>
+                        `; 
+
+                        if (participantResponded){
+                            triggerSimultaneousReveal()
+                        }
+                    }
+
+                    // Participant response locked in 
+                    function handleEnter(event) {
+
+                        if (event.key !== "Enter" && event.code !== "Space") {
+                            return;
+                        }
+
+                        if (startTime === null ||
+                            participantResponded ||
+                            trialEnded) {
+                            return;
+                        }
+
+                        event.preventDefault();
+
+                        // A missing choice cannot be selected after GO
+                        if (selectedChoice === null) {
+                            enterInstruction.innerHTML =
+                                "<strong>No choice was selected. " +
+                                "The round will end when time runs out.</strong>";
+                            return;
+                        }
+
+                        participantResponded = true;
+                        participantRT = performance.now() - startTime;
+
+                        if (participantTimeout !== null) {
+                            clearTimeout(participantTimeout);
+                            participantTimeout = null;
+                        }
+
+                        if(computerLockedIn){
+                            triggerSimultaneousReveal();
+                        }else{
+                            enterInstruction.innerHTML = `<strong>Locked in! Waiting for ${computerName}...`;
+                        }
+                    };
+
+                    //REVEAL
+                    function triggerSimultaneousReveal(){
+                        if(syncRevealTimeout !== null || trialEnded) return;
+
+                        enterInstruction.innerHTML = "<strong>Synchronizing moves...</strong>"; 
+
+                        ///brief delay for reveal 
+                        syncRevealTimeout = setTimeout(function(){
+                            countdown.textContent ="";
+                            countdown.classList.remove("practice-go");
+                            showRoundResult(false)
+                        }, 1200); 
+                    }
+
+                    // TIMEOUT
+                    function handleParticipantTimeout() {
+
+                        if (participantResponded || trialEnded) {
+                            return;
+                        }
+
+                        participantResponded = true;
+                        timeoutRT = performance.now() - startTime;
+
+                        if(computerLockTimeout !== null){
+                            clearTimeout(computerLockTimeout);
+                            computerLockTimeout = null;
+                        }
+
+                        computerLockedIn = true;
+
+                        if (selectedChoice !== null) {
+                            // Force the opponent to win on timeout
+                            computerChoice = getComputerChoice(
+                                selectedChoice,"computer");
+
+                        } else {
+                            // No participant choice: generate an opponent move
+                            computerChoice =
+                                jsPsych.randomization.sampleWithoutReplacement(
+                                    ["rock", "paper", "scissors"],1)[0];
+                        }
+                        countdown.textContent = "";
+                        countdown.classList.remove("practice-go");
+                        showRoundResult(true);
+                    }
+
+                    //detailed round results 
+                    function getRoundMessage(player, computer, roundOutcome, timedOut){
+                        if (timedOut) {
+                            return `${computerName} wins! Too slow to play a move.`;
+                        }
+
+                        player = (player || "").toLowerCase();
+                        computer = (computer || "").toLowerCase();
+
+                        if (player === computer || roundOutcome === "tie") {
+                            const capMove = player ? (player.charAt(0).toUpperCase() + player.slice(1)) : "choice";
+                            return `Tie round! Both chose ${capMove}.`;
+                        }
+
+                        let verbPhrase = "";
+                        if ((player === "paper" && computer === "rock") || (computer === "paper" && player === "rock")) {
+                            verbPhrase = "Paper covers rock";
+                        } else if ((player === "scissors" && computer === "paper") || (computer === "scissors" && player === "paper")) {
+                            verbPhrase = "Scissors cuts paper";
+                        } else if ((player === "rock" && computer === "scissors") || (computer === "rock" && player === "scissors")) {
+                            verbPhrase = "Rock crushes scissors";
+                        }
+
+                        if (roundOutcome === "player") {
+                            const name = typeof participantName !== 'undefined' ? participantName : "You";
+                            return `${name} wins! ${verbPhrase}.`;
+                        } else {
+                            return `${computerName} wins! ${verbPhrase}.`;
+                        }
+                    }
+
+                    // SHOW ROUND RESULT AND UPDATE SCORE
+                    function showRoundResult(timedOut) {
+
+                        if (trialEnded) {return;}
+
+                        // Prevent further interaction while showing results
+                        lockedIn = true;
+
+                        const isFinalRound = (current_round + 1) >= 4; // Check if this is the last round
+
+                        if (computerChoice === null) {
+                            computerChoice = getComputerChoice(selectedChoice, outcome);
+                                }
+
+                        //update the scoreboard and apply results 
+                        if (selectedChoice !== null) {
+                                dropBox.innerHTML = `<img src="${participant_images[selectedChoice]}" alt="${selectedChoice}" width="180">`;
+                            } else {
+                                dropBox.innerHTML = "<p>NO CHOICE</p>";
+                            }
+
+                            // REVEAL OPPONENT MOVE
+                            computerBox.innerHTML = `<img src="${computer_images[computerChoice]}" alt="${computerChoice}" width="180">`;
+                            computerBox.classList.add("reveal");
+
+                            const roundOutcome = timedOut ? "computer" : outcome;
+
+                            // UPDATE SCOREBOARD & APPLY RESULT STYLING
+                            if (timedOut) {
+                                if (selectedChoice !== null) dropBox.classList.add("loser");
+                                computerBox.classList.add("winner");
+                                const computerScore = document.getElementById("computer-score");
+                                computerScore.textContent = parseInt(computerScore.textContent, 10) + 1;
+                            } else {
+                                if (roundOutcome === "player") {
+                                    dropBox.classList.add("winner");
+                                    computerBox.classList.add("loser");
+                                    const playerScore = document.getElementById("player-score");
+                                    playerScore.textContent = parseInt(playerScore.textContent, 10) + 1;
+                                } else if (roundOutcome === "computer") {
+                                    dropBox.classList.add("loser");
+                                    computerBox.classList.add("winner");
+                                    const computerScore = document.getElementById("computer-score");
+                                    computerScore.textContent = parseInt(computerScore.textContent, 10) + 1;
+                                } else {
+                                    dropBox.classList.add("tie");
+                                    computerBox.classList.add("tie");
+                                }
+                        }
+
+                        // Show feedback while preserving the opponent's image
+                        const resultText = getRoundMessage(selectedChoice, computerChoice, roundOutcome, timedOut);
+                        feedback.innerHTML = resultText;
+                        feedback.style.backgroundColor = (timedOut || roundOutcome === "computer") ? "#f8d7da" : (roundOutcome === "player" ? "#d1e7dd" : "#e2e3e5");
+                        feedback.style.borderColor = (timedOut || roundOutcome === "computer") ? "#f5c2c7" : (roundOutcome === "player" ? "#badbcc" : "#d3d6d8");
+
+                        enterInstruction.textContent = "";
+
+                        //trial data to save
+                        const isPlayerWin = roundOutcome === "player";
+                        const isComputerWin = roundOutcome === "computer";
+                        const isTie = roundOutcome === "tie";
+
+                        if (isPlayerWin) {
+                            player_wins++;
+                        } else if (isComputerWin) {
+                            computer_wins++;
+                        } else if (isTie) {
+                            ties++;
+                        }
+
+                        const roundComplianceIssue = timedOut || selectedChoice === null || !participantResponded;
+                        if (roundComplianceIssue) {
+                            participant_flagged = true; // Flag participant for review if they timed out or didn't select a choice
+                        }
+
+                        if(isFinalRound){
+                            if (player_wins > computer_wins) {
+                                if(participant_outcome !== 'win'){
+                                    participant_outcome_issue = true; // Participant should have won but didn't
+                                }
+                            } else if (player_wins < computer_wins) {
+                                if(participant_outcome !== 'lose'){
+                                    participant_outcome_issue = true; // Participant should have lost but didn't
+                                }
+                            } else { // tie
+                                if(participant_outcome !== 'tie'){
+                                    participant_outcome_issue = true; // Participant should have tied but didn't
+                                }
+                            }
+                        }
+
+                        
+
+                        // Save trial data once
+                        //to do: add a variable for if someone timed out or if they did not select a choice before the countdown ended
+                        jsPsych.data.addDataToLastTrial({
+                            round: current_round + 1,
+                            player_choice: selectedChoice,
+                            computer_choice: computerChoice,
+                            outcome: roundOutcome, //variable to indicate the outcome of the round (player win, computer win, tie)
+                            participant_rt: timedOut ? null : Math.round(participantRT),
+                            computer_rt: computerRT,
+                            computer_locked_first: computerRT < participantRT,
+                            selected_before_go: selectedChoice !== null, //variable to indicate if the participant selected a choice before the countdown ended (true = selected, false = did not select)
+                            timed_out: timedOut, //variable to indicate if the participant timed out or not (true = timed out, false = did not time out)
+                            timeout_rt: timedOut ? Math.round(timeoutRT) : null, 
+                            
+                            total_player_wins: player_wins,
+                            assigned_wins: n_wins,
+                            round_compliance_issue: roundComplianceIssue,
+                            flagged: participant_flagged, // True if they missed ENTER/choice this round
+                            participant_outcome_issue: participant_outcome_issue // True if their overall outcome doesn't match the predetermined outcome schedule
+                        });
+                        
+                        //save the overall outcome and flagged status at the end of the game (after round 4)
+                        if (isFinalRound) {
+                            jsPsych.data.addProperties({
+                                participant_outcome_issue: participant_outcome_issue, 
+                                total_player_wins: player_wins,
+                                total_computer_wins: computer_wins,
+                                total_ties: ties,
+                                participant_flagged: participant_flagged
+                            });
+                        }
+                        
+                        if (isFinalRound) {
+                            // if final round, automatically advance to the end of the game screen after a short delay (2.5 seconds)
+                            continueTimeout = setTimeout(function() {
+                                advanceTrial();
+                            }, 2500);
+                        } else {
+                            continueTimeout = setTimeout(function() {
+                                continueReady = true;
+                                continueButton.style.display = "block";
+                            }, 500);
+                        }
+                    }
+
+                    function advanceTrial() {
+                        if (trialEnded) {return;}
+                        trialEnded = true;
+
+                        // Remove listeners
+                        document.removeEventListener("keydown", handleEnter);
+
+                        // Clear active timers
+                        if (countdownInterval !== null) clearInterval(countdownInterval);
+                        if (computerRevealTimeout !== null) clearTimeout(computerRevealTimeout);
+                        if (participantTimeout !== null) clearTimeout(participantTimeout);
+                        if (continueTimeout !== null) clearTimeout(continueTimeout);
+                        if (syncRevealTimeout !== null) clearTimeout(syncRevealTimeout);
+
+                        current_round++;
+
+                        jsPsych.finishTrial();
+                    }
+
+                    // Continue button to advance 
+                        function handleContinue() {
+                        if (!continueReady || trialEnded) {return; }
+
+                        // Disable the button immediately so they can't double-click
+                        continueButton.disabled = true;
+                        continueButton.style.cursor = "not-allowed";
+                        continueButton.style.opacity = "0.7";
+                        
+                        // Show a realistic status message simulating player 2 clicking continue
+                        continueButton.textContent = `Waiting for ${computerName}...`;
+
+                        // Generate random delay duration
+                        const jitterDelay = Math.floor(
+                            Math.random() * (MAX_JITTER_TIME - MIN_JITTER_TIME + 1) ) + MIN_JITTER_TIME; //4.5-.5 second delay 
+
+                        // Delay advancing the trial
+                        setTimeout(function() {
+                            advanceTrial();
+                        }, jitterDelay);
+                    }
+
+                    continueButton.addEventListener("click", handleContinue);
+                    // Activate keyboard listeners
+                    document.addEventListener("keydown", handleEnter);
+                }
+            };
+        }
+        /*
+        timeline.push({
+            timeline: [
+                //4 main game rounds 
+                createRPSRound(),
+                createRPSRound(), 
+                createRPSRound(), 
+                createRPSRound()
+            ]
+        });*/
+        
+        // switch to end game screen when round 4 is complete. show overall outcome and score and turn the scoreboard into actualized earnings
+        function createRPSEndTrial() {
+            return {
+                type: jsPsychHtmlKeyboardResponse,
+                stimulus: function() {
+                    // Determine actual game outcome & earnings
+                    let matchOutcome = "tie";
+                    let pEarnings = 2;
+                    let cEarnings = 2;
+                    let outcomeTitle = "It's a Tie Match!";
+                    let outcomeSubtitle = "Both players perform equally and earn $2.00.";
+
+                    if (player_wins > computer_wins) {
+                        matchOutcome = "player";
+                        pEarnings = 3;
+                        cEarnings = 1;
+                        outcomeTitle = `${participantName} Wins the Match!`;
+                        outcomeSubtitle = `${participantName} earns the $3.00 winner bonus.`;
+                    } else if (computer_wins > player_wins) {
+                        matchOutcome = "computer";
+                        pEarnings = 1;
+                        cEarnings = 3;
+                        outcomeTitle = `${computerName} Wins the Match!`;
+                        outcomeSubtitle = `${computerName} earns the $3.00 winner bonus.`;
+                    }
+                    return `
+                        <div id="end-screen-wrapper">
+                            <!-- Title Header -->
+                            <h1 id="match-title" style="font-size: 36px; margin-bottom: 10px;">${outcomeTitle}</h1>
+                            <p id="match-subtitle">Calculating final bonus earnings...</p>
+                            <button id="summary-continue-btn">
+                                Continue
+                            </button>
+                        </div>
+                        `;
+                },
+                choices: "NO_KEYS", 
+                data:{task:"rps_summary_visualization"}, 
+                on_load: function() {
+                    const scoreboard = document.getElementById("scoreboard");
+                    const continueBtn = document.getElementById("summary-continue-btn");
+                    const matchTitle = document.getElementById("match-title");
+                    const subtitle = document.getElementById("match-subtitle");
+                    
+                    // Save original HTML structure of the corner scoreboard
+                    const originalScoreboardHTML = scoreboard.innerHTML;
+
+                    // Player and opponent display names
+                    let pName = typeof participantName !== 'undefined' ? participantName : "You";
+                    let cName = typeof computerName !== 'undefined' ? computerName : "Opponent";
+
+                    // 1. Calculate target dollar amounts (integers for the counter)
+                    let pTarget = player_wins > computer_wins ? 3 : (computer_wins > player_wins ? 1 : 2);
+                    let cTarget = computer_wins > player_wins ? 3 : (player_wins > computer_wins ? 1 : 2);
+
+                    let pEarnings = `$${pTarget}.00`;
+                    let cEarnings = `$${cTarget}.00`;
+
+                    // 2. Dynamic class selection: green text for winner, grey text for tie/loss
+                    let pClass = player_wins > computer_wins ? "earnings-text" : "earnings-text secondary";
+                    let cClass = computer_wins > player_wins ? "earnings-text" : "earnings-text secondary";
+
+                    // Ensure scoreboard is visible
+                    scoreboard.style.display = "block";
+
+                    // STEP 1: Slide scoreboard to screen center first (0.4s delay after trial load)
+                    setTimeout(() => {
+                        scoreboard.classList.add("summary-mode");
+                        if (matchTitle) matchTitle.style.opacity = "0";
+                        if (subtitle) subtitle.style.opacity = "0";
+                    }, 2000);
+
+                    // STEP 2: Wait for centering transition to complete (1.4s total), THEN insert $0.00 template and start ticking counter
+                    setTimeout(() => {
+                        scoreboard.innerHTML = `
+                            <strong style="font-size: 18px; color: #333333; display: block; margin-bottom: 12px;">MATCH EARNINGS</strong>
+                            <div style="margin-bottom: 12px; font-size: 17px;">
+                                <span>${pName}:</span> <strong>${player_wins} Wins</strong><br>
+                                <span id="p-bonus-count" class="${pClass}">$0.00 Bonus</span>
+                            </div>
+                            <div style="font-size: 17px;">
+                                <span>${cName}:</span> <strong>${computer_wins} Wins</strong><br>
+                                <span id="c-bonus-count" class="${cClass}">$0.00 Bonus</span>
+                            </div>
+                        `;
+                        subtitle.textContent = "Updating bonus earnings...";
+
+                        // START TICKING COUNTER
+                        let pCurrent = 0;
+                        let cCurrent = 0;
+
+                        const counterInterval = setInterval(() => {
+                            let stillCounting = false;
+
+                            if (pCurrent < pTarget) {
+                                pCurrent++;
+                                stillCounting = true;
+                            }
+                            if (cCurrent < cTarget) {
+                                cCurrent++;
+                                stillCounting = true;
+                            }
+
+                            // Update DOM text tick by tick
+                            const pElement = document.getElementById("p-bonus-count");
+                            const cElement = document.getElementById("c-bonus-count");
+                            if (pElement) pElement.textContent = `$${pCurrent}.00 Bonus`;
+                            if (cElement) cElement.textContent = `$${cCurrent}.00 Bonus`;
+
+                            // When final values are reached, stop counter & show Continue button
+                            if (!stillCounting) {
+                                clearInterval(counterInterval);
+                                subtitle.textContent = "Bonus earnings finalized.";
+
+                                // Reveal Continue button cleanly
+                                setTimeout(() => {
+                                    continueBtn.style.display = "block";
+                                    setTimeout(() => {
+                                        continueBtn.style.opacity = "1";
+                                    }, 100);
+                                }, 1000);
+                            }
+                        }, 850); // 850ms tick interval per dollar increment
+
+                    }, 3500);
+
+                    // STEP 3: Return scoreboard to top-right on Continue click & advance trial
+                    continueBtn.addEventListener("click", function() {
+                        continueBtn.disabled = true;
+                        continueBtn.style.opacity = "0";
+                        document.getElementById("match-title").style.opacity = "0";
+                        subtitle.style.opacity = "0";
+
+                        // Trigger CSS transition glide back to top right corner
+                        scoreboard.classList.remove("summary-mode");
+
+                        // Wait 1200ms for return animation to complete before restoring inner HTML & ending trial
+                        setTimeout(() => {
+                            scoreboard.innerHTML = originalScoreboardHTML;
+                            
+                            // Safely update scores on restored corner scoreboard
+                            const scoreTitle = document.getElementById("scoreboard-title");
+                            if (scoreTitle) scoreTitle.textContent = "Final Earnings";
+
+                            const playerScoreElem = document.getElementById("player-score");
+                            const computerScoreElem = document.getElementById("computer-score");
+                            if (playerScoreElem) playerScoreElem.textContent = pEarnings;
+                            if (computerScoreElem) computerScoreElem.textContent = cEarnings;
+
+                            jsPsych.finishTrial();
+                        }, 1200);
+                    });
+                }
+            }
+        };
+        timeline.push(createRPSEndTrial());
+
+        //To Do: end of the game screen --> announce final score and outcome (win/lose/tie) and change the scoreboard to earnings
+        var message_intro = {
+        type: window. jsPsychHtmlButtonResponse, 
+        choices: ["Continue"], 
+        //TO DO: edit the message to make the one-shot interaction more believable and to make the participant feel like they are interacting with a real person
+        stimulus: `
+            <h2>Match Complete!</h2>
+            <p>
+            The bonus earnings have been calculated and added to your scoreboard.
+            </p>
+            
+            <p>
+                Before proceeding to the next task, you will have a short opportunity to send a message to the other participant.
+            </p>
+            
+            <p>
+                Research shows that reflecting on how you made previous decisions allows for easier task-switching.<br><br>
+                Feel free to share your thoughts, strategy, or post-match comments.
+            </p>`
+            
+        };
+        //timeline.push(message_intro);
+
+        //randomly assign the participant to one of three conditions: skill, luck, or none (control)
+        const infoConditions = ["skill", "luck", "none"];
+        const participant_info = jsPsych.randomization.sampleWithoutReplacement(
+            infoConditions, 1)[0];
+
+        //Post-Game Messages (To Do: edit this a bit with Mike)
+        const postGameMessages = {
+            lose: { // Participant lost overall
+                skill: "gg! i noticed you kept opening with paper so i tried to counter with scissors on the important rounds.",
+                luck: "gg! i had no strategy at all honestly, i was just clicking randomly every round without thinking lol.",
+                none: "good game. this  was fun" //check if lowercase is allowed for this 
+            },
+            tie: { // Participant tied overall
+                skill: "tie game! i was trying to predict your pattern based on previous rounds, but you kept switching it up.",
+                luck: "tie game! i was just picking totally at random every time, funny how we ended up tying!",
+                none: "good game. this  was fun"
+            },
+            win: { // Participant won overall
+                skill: "gg you got me! i tried to read your choices and play strategically but you outplayed me.",
+                luck: "gg! i was choosing totally at random every round so i guess my luck ran out haha.",
+                none: "good game. this  was fun"
+            }
+        };
+
+        //messaging function 
+        function createChatTrial(participant_outcome, infoCondition) {
+            const opponentMessageText = postGameMessages [participant_outcome][infoCondition];
+            return {
+                type: jsPsychHtmlKeyboardResponse,
+                choices: "NO_KEYS",
+                stimulus: `
+                    <div style="max-width: 800px; margin: 0 auto;">
+                        <h3>Post-Game Note</h3>
+                        <p style="font-size: 18px; color: #333; margin-bottom: 15px;">
+                            Share a quick note with <strong>${computerName}</strong> about your strategy or any thoughts you had during the game before proceeding.
+                        </p>
+
+                        <div class="chat-window">
+                            <div class="chat-header">
+                                Match Chat: ${participantName} & ${computerName}
+                            </div>
+
+                            <div id="chat-status" class="chat-status-bar">
+                                Connecting to match chat...
+                            </div>
+
+                            <div id="chat-messages" class="chat-messages">
+                                <!-- Messages bubbles inserted here -->
+                            </div>
+
+                            <div class="chat-input-area" style="flex-direction:column;">
+                                <div style="display:flex; gap: 10px; width:100%;">
+                                <input type="text" id="user-msg-input" placeholder="Type your note here..." maxlength="300" autocomplete="off" />
+                                <button id="send-msg-btn">Send</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button id="proceed-btn" style="
+                            display: none;
+                            margin: 20px auto 0;
+                            padding: 12px 30px;
+                            font-size: 16px;
+                            font-weight: bold;
+                            cursor: pointer;
+                            border-radius: 6px;
+                            border: solid 1px #ccc;
+                            background-color: white;
+                            color: #515357;
+                        ">
+                            Continue
+                        </button>
+                    </div>
+                `,
+                data: {
+                    task: "post_game_chat",
+                    outcome_condition: participant_outcome,
+                    info_condition: infoCondition,
+                    opponent_message_sent: opponentMessageText
+                },
+
+                on_load: function() {
+                    const chatMessages = document.getElementById("chat-messages");
+                    const chatStatus = document.getElementById("chat-status");
+                    const typingIndicator = document.getElementById("opponent-typing");
+                    const msgInput = document.getElementById("user-msg-input");
+                    const sendBtn = document.getElementById("send-msg-btn");
+                    const proceedBtn = document.getElementById("proceed-btn");
+
+                    let participantTypedText = "";
+                    let userMessageSent = false;
+                    let opponentMessageRevealed = false;
+
+                    // Auto-focus text input on load
+                    msgInput.focus();
+
+                    function showTypingIndicator() {
+                        if(document.getElementById("opponent-typing")) {return;}
+                        const typingIndicator = document.createElement("div");
+                        typingIndicator.id = "opponent-typing";
+                        typingIndicator.className = "typing-indicator";
+                        typingIndicator.innerHTML = `
+                            <span style="font-size: 11px; color: #6c757d; margin-right: 6px;">${computerName} is typing</span>
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                        `;
+                        chatMessages.appendChild(typingIndicator);
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                    }
+
+                    function removeTypingIndicator() {
+                        const typingIndicator = document.getElementById("opponent-typing");
+                        if (typingIndicator) {
+                            chatMessages.removeChild(typingIndicator);
+                        }
+                    }
+
+                    function checkProceedCondition() {
+                        if (userMessageSent && opponentMessageRevealed) {
+                            setTimeout(function() {
+                                proceedBtn.style.display = "block";
+                            }, 600);
+                        }
+                    }
+
+                    // Function to post user message to the right side
+                    function handleUserSend() {
+                        const text = msgInput.value.trim();
+                        if (text === "" || userMessageSent) return;
+
+                        userMessageSent = true;
+                        participantTypedText = text;
+
+                        // Disable input controls
+                        msgInput.disabled = true;
+                        sendBtn.disabled = true;
+                        sendBtn.textContent = "Sent";
+
+                        // Append user message bubble (Right)
+                        const userBubble = document.createElement("div");
+                        userBubble.className = "chat-bubble bubble-user";
+                        userBubble.textContent = text;
+                        chatMessages.appendChild(userBubble);
+
+                        // Scroll to bottom
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                        checkProceedCondition();
+
+                        // Schedule opponent message reveal if not revealed yet
+                        // scheduleOpponentResponse();
+                    }
+
+                    //opponent message timeline 
+                    const connectionDelay = 1500; //delay between connecting and chat connected appears 
+                    const thinkingDelay = Math.floor(Math.random() * 1500) + 2000; // 2-3.5 seconds
+                    const firstDraftDelay = 1800; // 1.8 seconds
+                    const pauseDeleteDelay = 1800; // 1.5 seconds
+                    const secondDraftDelay = 1500 + opponentMessageText.length * 25; // 1.5 seconds + scaling function
+
+                    // STEP 1: connectionDelay -> Switch status to "Chat connected"
+                    setTimeout(function() {
+                        if (chatStatus) chatStatus.textContent = "Chat connected";
+
+                        // STEP 2: thinkingDelay -> Show typing indicator
+                        setTimeout(function() {
+                            showTypingIndicator();
+
+                            // STEP 3: firstDraftDelay -> Erase / Pause draft
+                            setTimeout(function() {
+                                removeTypingIndicator();
+
+                                // STEP 4: pauseDeleteDelay -> Show typing indicator again
+                                setTimeout(function() {
+                                    showTypingIndicator();
+
+                                    // STEP 5: secondDraftDelay -> Post final message
+                                    setTimeout(function() {
+                                        removeTypingIndicator();
+
+                                        // Append opponent message bubble (Left)
+                                        const opponentBubble = document.createElement("div");
+                                        opponentBubble.className = "chat-bubble bubble-opponent";
+                                        opponentBubble.textContent = opponentMessageText;
+                                        chatMessages.appendChild(opponentBubble);
+
+                                        // Scroll to bottom
+                                        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                                        opponentMessageRevealed = true;
+
+                                        // Check if user has also sent message
+                                        checkProceedCondition();
+
+                                    }, secondDraftDelay);
+
+                                }, pauseDeleteDelay);
+
+                            }, firstDraftDelay);
+
+                        }, thinkingDelay);
+
+                    }, connectionDelay);
+
+                    // Listeners for sending message
+                    sendBtn.addEventListener("click", handleUserSend);
+                    msgInput.addEventListener("keydown", function(e) {
+                        if (e.key === "Enter") {
+                            e.preventDefault();
+                            handleUserSend();
+                        }
+                    });
+
+                    // Save typed message to jsPsych data upon completing trial
+                    proceedBtn.addEventListener("click", function() {
+                        jsPsych.data.addDataToLastTrial({
+                            participant_typed_message: participantTypedText
+                        });
+                        jsPsych.finishTrial();
+                    });
+                }
+            };
+        }
+        //timeline.push(createChatTrial(participant_outcome, participant_info)); 
+
+
+        var filler_lists = [
+            {
+                name: "filler_1",
+                words: ["Apple", "Orange", "Carrot", "Pear"],
+                odd_one_out: "Carrot"
+            },
+            {
+                name: "filler_2",
+                words: ["Tin", "Ruby", "Emerald", "Pearl"],
+                odd_one_out: "Tin"
+            },
+            {
+                name: "filler_3",
+                words: ["Aunt", "Uncle", "Cousin", "Neighbor"],
+                odd_one_out: "Neighbor"
+            },
+            {
+                name: "filler_4",
+                words: ["Baseball", "Globe", "Orange", "Pizza Slice"],
+                odd_one_out: "Pizza Slice"
+            },
+            {
+                name: "filler_5",
+                words: ["Knife", "Spoon", "Fork", "Cup"],
+                odd_one_out: "Cup"
+            }, 
+            {
+                name: "filler_6",
+                words: ["Dog", "Cat", "Rabbit", "Elephant"],
+                odd_one_out: "Elephant"
+            }, 
+            {
+                name: "filler_7",
+                words: ["Mountain", "River", "Hill", "Valley"],
+                odd_one_out: "River"
+            }, 
+            {
+                name: "filler_8",
+                words: ["Paramedic", "Doctor", "Police Officer", "Teacher"],
+                odd_one_out: "Teacher"
+            }, 
+            {
+                name: "filler_9",
+                words: ["Soft", "Smooth", "Rough", "Loud"],
+                odd_one_out: "Loud"
+            }, 
+            {
+                name: "filler_10",
+                words: ["Broom", "Mop", "Vacuum", "Trash Can"],
+                odd_one_out: "Trash Can"
+            }
+        ];
+        // Randomize the order of the five lists
+        filler_lists = jsPsych.randomization.shuffle(filler_lists);
+
+        // filler task introduction
+        var filler_intro = {
+            type: jsPsychHtmlButtonResponse,
+            stimulus: `
+                <h2>Semantic Reasoning Task</h2>
+                <p>Next, you'll complete a short semantic reasoning task.</p>
+                <p>On each trial, you'll see four words. Your job is to select the word that does not belong with the other three.<br><strong>This task is not timed, so take as much time as you need.</strong></p>
+                <p>For example, if you see "Red", "Orange", "Green", and "Pineapple", the word that does not belong is "Pineapple" because it is a fruit while the others are colors.</p>
+                <p>Click "Continue" to begin the task.</p>
+            `,
+            choices: ["Continue"]
+        };
+        //timeline.push(filler_intro);
+
+        //filler task
+        var filler_trials = filler_lists.map(function(list, index) {
+
+        // Randomize word positions on each trial
+        var shuffled_words = jsPsych.randomization.shuffle(list.words);
+
+        return {
+            type: jsPsychHtmlButtonResponse,
+
+            stimulus: `
+                <h2>Which word does not belong with the others?</h2>
+
+                <p>Select one of the four words below.</p>
+
+                <div style="
+                    max-width: 600px;
+                    margin: 25px auto;
+                    display: grid;
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                    gap: 12px;
+                ">
+                    ${shuffled_words.map(function(word) {
+                        return `
+                            <div style="
+                                background-color: #f3f3f3;
+                                padding: 16px;
+                                border-radius: 6px;
+                                text-align: center;
+                                font-size: 18px;
+                            ">
+                                ${word}
+                            </div>
+                        `;
+                    }).join("")}
+                </div>
+            `,
+
+            // Hide the default jsPsych response buttons
+            choices: [],
+
+            // Store the randomized word order
+            data: {
+                task: "filler_task",
+                task_type: "semantic_odd_one_out",
+                list_name: list.name,
+                list_number: index + 1,
+                correct_answer: list.odd_one_out,
+                word_order: shuffled_words
+            },
+
+            on_load: function() {
+                var grid = document.querySelector(
+                    "#jspsych-html-button-response-stimulus div"
+                );
+
+                if (!grid) return;
+
+                grid.querySelectorAll("div").forEach(function(card) {
+                    card.style.cursor = "pointer";
+                    card.setAttribute("role", "button");
+                    card.setAttribute("tabindex", "0");
+
+                    card.addEventListener("mouseenter", function() {
+                        card.style.backgroundColor = "#dcdcdc";
+                    });
+
+                    card.addEventListener("mouseleave", function() {
+                        card.style.backgroundColor = "#f3f3f3";
+                    });
+
+                    function selectWord() {
+                        var response = card.textContent.trim();
+
+                        var trialData = {
+                            response: response,
+                            correct: response === list.odd_one_out
+                        };
+
+                        jsPsych.finishTrial(trialData);
+                    }
+
+                    card.addEventListener("click", selectWord);
+
+                    card.addEventListener("keydown", function(event) {
+                        if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            selectWord();
+                        }
+                    });
+                });
+            },
+
+            on_finish: function(data) {
+                data.odd_one_out_response = data.response;
+                data.correct = data.response === list.odd_one_out;
+                }
+            };
+        });
+        // Add the five trials to the timeline
+        //timeline.push(...filler_trials);
+        
+        //Measures 
+        // we are going to ask some questions about your perceptions of the earlier game 
+        var measures_into = {
+            type: jsPsychHtmlButtonResponse, 
+            choices: ["Continue"], 
+            stimulus: `
+            <h2>Post-Decision Perception & Evaluation Survey</h2>
+            <p>Thank you for completing the primary cognitive tasks! In the final part of this study, we'll ask you a few additional questions about your experience completing the tasks and your perceptions throughout the study.</p>
+            `
+        }; 
+        timeline.push(measures_into)
+        //attribution
+        var dv_attribution = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: `
+            <div style="width: 95%; max-width: 1000px; margin: 0 auto;">
+
+            <p style="font-size: 20px; margin-bottom: 35px;">
+                To what extent do you think skill versus luck determined the outcome of the game?
+            </p>
+
+            <div style="margin-bottom: 65px;">
+                <p><strong>Your opponent's outcome</strong></p>
+
+                <input
+                type="range"
+                id="opponent-attribution"
+                min="0"
+                max="100"
+                step="1"
+                value="50"
+                style="width: 100%;"
+                >
+
+                <div style="display: flex; justify-content: space-between;">
+                <span>Opponent's skill</span>
+                <span>Skill and luck equally</span>
+                <span>Opponent's luck</span>
+                </div>
+
+                <p style="text-align: center; margin-top: 30px">
+                Selected value: <span id="opponent-value">50</span>
+                </p>
+            </div>
+
+            <div style="margin-bottom: 35px;">
+                <p><strong>Your outcome</strong></p>
+
+                <input
+                type="range"
+                id="self-attribution"
+                min="0"
+                max="100"
+                step="1"
+                value="50"
+                style="width: 100%;"
+                >
+
+                <div style="display: flex; justify-content: space-between;">
+                <span>My skill</span>
+                <span>Skill and luck equally</span>
+                <span>My luck</span>
+                </div>
+
+                <p style="text-align: center; margin-top: 30px">
+                Selected value: <span id="self-value">50</span>
+                </p>
+            </div>
+
+            <button id="attribution-continue" class="jspsych-btn">
+                Continue
+            </button>
+
+            </div>
+        `,
+
+        choices: "NO_KEYS",
+        on_load: function() {
+            const opponentSlider = document.getElementById(
+            "opponent-attribution");
+
+            const selfSlider = document.getElementById(
+            "self-attribution");
+
+            opponentSlider.addEventListener("input", function() {
+            document.getElementById("opponent-value").textContent = this.value;});
+
+            selfSlider.addEventListener("input", function() {
+            document.getElementById("self-value").textContent = this.value;});
+
+            document.getElementById("attribution-continue")
+            .addEventListener("click", function() {
+                jsPsych.finishTrial({
+                attribution_other: Number(opponentSlider.value),
+                attribution_self: Number(selfSlider.value)
+                });
+
+            });
+        },
+
+        data: {
+            task: "survey",
+            measure: "attribution"
+        }
+        };
+        timeline.push(dv_attribution)
+       
+        // actions list --> To Do: should this be oppoent or ${computerName}
+        var dv_TAR = {
+        type: jsPsychSurveyLikert,
+        preamble: `
+        <div style="position: fixed; top: 0; background-color: white; padding: 10px; width: 95%; max-width: 1000px; border-bottom: 2px solid #ddd; z-index: 100;">
+        <p>For the set of questions below, we would like you to imagine how you might feel, think, and behave <b>towards your opponent</b> if you encountered them in the future. Select the choice that most aligns.</p>
+
+        <h3>I imagine myself...</h3>
+        </div>
+        <div style="margin-top: 180px;">
+        `,
+        questions: [
+            {
+            prompt: "<p>Praising the person to others</p>",
+            name: "dv_TAR_pos_praise",
+            labels: ["Disagree Strongly", "Disagree Moderately", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Agree Moderately", "Agree Strongly"],
+            required: true
+            },
+            {
+            prompt: "<p>Insulting the person</p>",
+            name: "dv_TAR_neg_insult",
+            labels: ["Disagree Strongly", "Disagree Moderately", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Agree Moderately", "Agree Strongly"],
+            required: true
+            },
+            {
+            prompt: "<p>Avoiding the person</p>",
+            name: "dv_TAR_neg_avoid",
+            labels: ["Disagree Strongly", "Disagree Moderately", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Agree Moderately", "Agree Strongly"],
+            required: true
+            },
+            {
+            prompt: "<p>Becoming friends with the person</p>",
+            name: "dv_TAR_pos_become_friends",
+            labels: ["Disagree Strongly", "Disagree Moderately", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Agree Moderately", "Agree Strongly"],
+            required: true
+            },
+            {
+            prompt:"<p>Saying unkind things about the person to others</p>",
+            name: "dv_TAR_neg_unkind_things",
+            labels: ["Disagree Strongly", "Disagree Moderately", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Agree Moderately", "Agree Strongly"],
+            required: true
+            },
+            {
+            prompt: "<p>Helping the person if they needed help</p>",
+            name: "dv_TAR_pos_helping",
+            labels: ["Disagree Strongly", "Disagree Moderately", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Agree Moderately", "Agree Strongly"],
+            required: true
+            },
+            {
+            prompt: "<p>Complimenting the person</p>",
+            name: "dv_TAR_pos_complementing",
+            labels: ["Disagree Strongly", "Disagree Moderately", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Agree Moderately", "Agree Strongly"],
+            required: true
+            },
+            {
+            prompt: "<p>Attention Check: Press <i>Agree a little</i></p>",
+            name: "attention_check",
+            labels: ["Disagree Strongly", "Disagree Moderately", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Agree Moderately", "Agree Strongly"],
+            required: true
+            },
+            {
+            prompt: "<p>Doing a favor for the person</p>",
+            name: "dv_TAR_pos_favor",
+            labels: ["Disagree Strongly", "Disagree Moderately", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Agree Moderately", "Agree Strongly"],
+            required: true
+            },
+            {
+            prompt: "<p>Inviting the person to do something fun</p>",
+            name: "dv_TAR_pos_invite_fun",
+            labels: ["Disagree Strongly", "Disagree Moderately", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Agree Moderately", "Agree Strongly"],
+            required: true
+            },
+            {
+            prompt: "<p>Ignoring the person</p>",
+            name: "dv_TAR_neg_ignore",
+            labels: ["Disagree Strongly", "Disagree Moderately", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Agree Moderately", "Agree Strongly"],
+            required: true
+            },
+        ],
+        randomize_question_order: true,
+        };
+        timeline.push(dv_TAR);
+
+        //dv3 state envy --> TO DO: think of into prompt before the question; double check which adj we want to keep 
+        var dv_emotion_checklist = {
+        type: jsPsychSurveyLikert,
+        preamble: `
+        <div style="position: fixed; top: 0; background-color: white; padding: 10px; width: 95%; max-width: 1000px; border-bottom: 2px solid #ddd; z-index: 100;">
+        <p>For the list below, please indicate which of these emotions you <b>feel towards your opponent</b>.</p>
+        </div>
+        <div style="margin-top: 80px;">
+        `,
+        questions: [
+            {
+            prompt: "<p>Envious</p>",
+            name: "dv2_state_envy",
+            labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
+            required: true
+            },
+            {
+            prompt: "<p>Jealous</p>",
+            name: "dv2_state_jealous",
+            labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
+            required: true  
+            },
+            {
+            prompt: "<p>Bitter</p>", 
+            name: "dv2_state_bitter",
+            labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
+            required: true
+            },
+            {
+            prompt: "<p>Resentful</p>",
+            name: "dv2_state_resentful",
+            labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
+            required: true
+            },
+            {
+            prompt: "<p>Happy</p>",
+            name: "dv2_state_happy",
+            labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
+            required: true
+            },
+            {
+            prompt: "<p>Compassionate</p>",
+            name: "dv2_state_compassionate",
+            labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
+            required: true
+            },
+            {
+            prompt: "<p>Surprised</p>", 
+            name: "dv2_state_surprised",
+            labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
+            required: true
+            }, 
+            {
+            prompt: "<p>Grateful</p>", 
+            name: "dv2_state_grateful",
+            labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
+            required: true
+            }, 
+            {
+            prompt: "<p>Thankful</p>", 
+            name: "dv2_state_thankful",
+            labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
+            required: true
+            }, 
+            {
+            prompt: "<p>Sad</p>", 
+            name: "dv2_state_sad",
+            labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
+            required: true
+            }, 
+            {
+            prompt: "<p>Upset</p>", 
+            name: "dv2_state_upset",
+            labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
+            required: true
+            }, 
+            {
+            prompt: "<p>Disappointed</p>",
+            name: "dv2_state_disappointed",
+            labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
+            required: true
+            }, 
+            {
+            prompt: "<p>Annoyed</p>",
+            name: "dv2_state_annoyed",
+            labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
+            required: true
+            }, 
+            {
+            prompt: "<p>Mad</p>",
+            name: "dv2_state_mad",
+            labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
+            required: true
+            }, 
+            {
+            prompt: "<p>Angry</p>",
+            name: "dv2_state_angry",
+            labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
+            required: true
+            }, 
+            {
+            prompt: "<p>Shame</p>", 
+            name: "dv2_state_shame",
+            labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
+            required: true
+            }, 
+            {
+            prompt: "<p>Contempt</p>", 
+            name: "dv2_state_contempt",
+            labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
+            required: true
+            }, 
+            {
+            prompt: "<p>Joy</p>", 
+            name: "dv2_state_joy",
+            labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
+            required: true
+            }, 
+            {
+            prompt: "<p>Irritated</p>", 
+            name: "dv2_state_irritated",
+            labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
+            required: true
+            }
+        ],
+        randomize_question_order: true,
+        }; 
+        timeline.push(dv_emotion_checklist); 
+
+        //dv4 ownership measure 
+        var dv_ownership = {
+        type: jsPsychSurveyLikert,
+        preamble: `
+        <div style="position: fixed; top: 0; background-color: white; padding: 10px; width: 95%; max-width: 1000px; border-bottom: 2px solid #ddd; z-index: 100;">
+        <p>The following questions are about the whole $4 bonus that you and your opponent were playing for, not just the amount you received.<br><br>
+            Please indicate how strongly you agree with the following statements.</p>
+        </div>
+        <div style="margin-top: 120px;">
+        `,
+        questions: [
+            {
+            prompt: "<p>I feel like the $4 bonus is mine.</p>",
+            name: "dv3_mine",
+            labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
+            required: true
+            },
+            {
+            prompt: "<p>I feel a very high degree of personal ownership of the $4 bonus.</p>",
+            name: "dv3_personal_ownership",
+            labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
+            required: true  
+            },
+            {
+            prompt: "<p>I feel like I own the $4 bonus.</p>", 
+            name: "dv3_self_own",
+            labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
+            required: true
+            },
+            {
+            prompt: "<p>The $4 bonus belongs to my opponent.</p>",
+            name: "dv3_other_belong",
+            labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
+            required: true
+            },
+            {
+            prompt: "<p>My opponent owns the $4 bonus.</p>",
+            name: "dv3_other_own",
+            labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
+            required: true
+            },
+            {
+            prompt: "<p>I feel like the $4 bonus belongs to me and my opponent.</p>",
+            name: "dv3_belong_us",
+            labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
+            required: true
+            },
+            {
+            prompt: "<p>My opponent and I jointly own the $4 bonus.</p>", 
+            name: "dv3_joint_own",
+            labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
+            required: true
+            }, 
+            {
+            prompt: "<p>I feel a high degree of shared ownership of the $4 bonus.</p>", 
+            name: "dv3_shared_own",
+            labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
+            required: true
+            }, 
+            {
+            prompt: "<p>I deserve the amount of money I received.</p>", 
+            name: "dv3_deserve_self",
+            labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
+            required: true
+            }, 
+            {
+            prompt: "<p>My opponent deserves the amount of money they received.</p>", 
+            name: "dv3_deserve_other",
+            labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
+            required: true
+            }, 
+        ],
+        randomize_question_order: true,
+        }; 
+        timeline.push(dv_ownership); 
+
+       var RA_end = {
+            type: jsPsychHtmlButtonResponse,
+            stimulus: `
+                <h2>Demos, Funnel, and Debrief</h2>
+                <p>Demogrphics, funnel questions, and a debrief will follow, but that isn't necessary for you to review</p>
+                <p>So, this is where you and I part ways.</p>
+            `,
+            choices: ["Goodbye."], 
+            on_finish: function(data){
+                if(data.response === 0){
+                    setTimeout(function() {
+                        window.location.href = "https://forms.gle/v5rLdjptERog5H6u5" //to do: add google form here 
+                    }, 7000); // 7 second redirect
+                }
+            }
+        };
+        timeline.push(RA_end);
+        
+        //demos 
+        var demographics = {
+        type: jsPsychSurveyMultiChoice,
+        preamble: `
+        <style>
+            .jspsych-survey-multi-choice-question { margin-top: 3em; margin-bottom: 2em; text-align: left; }
+        </style>
+        `,
+        questions: [
+            {
+            prompt: "<p>How many meals have you had in your life?</p>",
+            name: "demo_attention_check",
+            options: ["1", "10", "100", "1000+"],
+            required: true,
+            horizontal: false
+            },
+            {
+            prompt: "<p>Please select the term below that best describes your sex identity?</p>",
+            name: "demo_sex", 
+            options: ["Male", "Female", "I prefer not to answer"],
+            required: true,
+            horizontal: false
+            }, 
+            {
+            prompt: "<p>Please select the term below that best describes your gender identity?</p>",
+            name: "demo_gender",
+            options: ["Man", "Woman", "Non-binary", "My gender identity is not listed here","I prefer not to answer"],
+            required: true,
+            horizontal: false
+            }, 
+            {
+            prompt: "<p>What is the highest level of school you have completed or the highest degree you have received??</p>",
+            name: "demo_education",
+            options: ["Less than high school", "High school diploma or equivalent (including GED)", "Some college, no degree", "Associate degree (2-years)", "Bachelor's degree (4-years)", "Master's degree", "Professional degree", "Doctorate degree", "I prefer not to answer"],
+            required: true,
+            horizontal: false
+            }, 
+            {
+            prompt: "<p>How would you rate your social class?</p>",
+            name: "demo_social_class",
+            options: ["1 = lower/working", "2 = lower middle", "3 = middle", "4 = upper middle", "5 = upper class", "I prefer not to answer"],
+            required: true,
+            }, 
+            {
+            prompt: "<p>Which of the following best describes your marital status?</p>",
+            name: "demo_marital_status",
+            options: ["Never married", "Married/In a domestic partnership", "Widowed", "Divorced", "Other",  "I prefer not to answer"],
+            required: true,
+            horizontal: false
+            }
+        ],
+        data: {task: "survey"}
+        }
+
+        var demographics_age = {
+        type: jsPsychSurveyText,
+        questions: [
+            {
+            prompt: "<p>What is your age in years?</p>",
+            name: "demo_age",
+            required: true,
+            placeholder: "Enter your age here"
+            }
+        ],
+        data: {task: "survey", measure: "demo_age"}
+        }
+
+        var demographics_race = {
+        type: jsPsychSurveyMultiSelect, 
+        questions: [
+            {
+            prompt: "<p>What is your race/ethnicity. Select all that apply. </p>",
+            options: ["Black or African American", "Hispanic or Latino", "White", "Asian", "Native American or Alaska Native", "Native Hawaiian or Other Pacific Islander",  "Middle Eastern","Other", "I prefer not to answer"],
+            name: "demo_race", 
+            required: true,
+            horizontal: false
+            },
+            ], 
+            data: {task: "survey", measure: "demo_race"}
+        }
+        timeline.push(demographics, demographics_age, demographics_race);
+
+        var attention_check_2 = {
+        type: jsPsychSurveyLikert,
+        questions: [
+            {
+            prompt: "<p>How much attention did you pay to this study?</p>",
+            name: "attention_check_2",
+            labels: ["Almost none", "Very little", "Some", "A lot", "Almost all"],
+            required: true
+            }
+        ], 
+        data: {task: "survey", measure: "attention_check_2"}
+        }
+        timeline.push(attention_check_2);
+
+        //funnel questions --> TO DO: think about these funnel questions more 
+        var funnel_questions = {
+        type: jsPsychSurveyText,
+        questions: [
+            {
+            prompt: `<p>What do you think the study was about?</p>`,
+            name: "funnel1",
+            required: false
+            },
+            {
+            prompt: `<p>What hypothesis/hypotheses do you think we were testing in this study?</p>`,
+            name: "funnel2",
+            required: false
+            }, 
+            {
+            prompt: `<p>Do you have any feedback that could help us improve this study?</p>`,
+            name: "funnel3",
+            required: false
+            }
+        ], 
+        data: {task: "survey"}
+        };
+        timeline.push(funnel_questions); 
+
+        ///exit fullscreen before debrief
+        const exit_fullscreen = {
+        type: jsPsychFullscreen,
+        fullscreen_mode: false
+        };
+        timeline.push(exit_fullscreen);
+
+        // save data using jsPsych-Pipe
+        /*const save_data = {
+            type: jsPsychPipe,
+            action: "save",
+            experiment_id: "bxhBJ7Rd5Yt4",
+            filename: filename,
+            data_string: () => jsPsych.data.get().csv()  // now includes subject_id column
+            };
+        timeline.push(save_data);
+        */ 
+
+        //debrief 
+        var debrief = {
+        type: window.jsPsychHtmlButtonResponse,
+        stimulus: `
+            <h2 style = "text-align: start; margin-right: 50px; margin-left: 50px">Thank you for participating in this study.</h2>
+            <p style = "text-align: start; margin-right: 50px; margin-left: 50px">
+                We were interested in how games with that end in a tie influence feelings of envy. You played a rock, paper, scissors with another player and either won, tied, or lost a reward. Following this, you responded to emotion assessments regarding how you felt towards the person you played rock, paper, scissors with.</p>
+            <p style = "text-align: start; margin-right: 50px; margin-left: 50px">
+                If other people knew the true purpose of the study, it might affect how they behave/answer questions, so we are asking you not to share the information we just discussed. </p><br>
+            <p><i>Press the button to be redirected to Prolific to log completion. Or, you will be automatically redirected in one minute.</i></p>
+        `, 
+        choices: ["Complete"],       // prevent manual advancement
+        trial_duration: 60000,     // display for a minute
+        on_finish: function() {
+            window.location.href = "https://app.prolific.co/submissions/complete?cc=XXXX";  // PUT PROLIFIC COMPLETION URL HERE 
+        }
+        };
+        //timeline.push(debrief);
+
+// Run the experiment
+jsPsych.run(timeline)
+</script>
+</html>
