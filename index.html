@@ -935,12 +935,41 @@
           ]),
           required: true,
           horizontal: false, 
-          name: "comprehension5"
+          name: "comprehension4"
         },
         ],
         button_label: "Submit", 
-        randomize_question_order: false
-    }; 
+        randomize_question_order: false, 
+        on_finish: function(data){
+            // 1. Answer key (Make sure these exact text strings match your target choices)
+            const correctAnswers = {
+            comprehension1: "Only after “GO!” appears.",
+            comprehension2: "Press Enter or Space to lock in your choice.",
+            comprehension3: "I automatically lose the round.",
+            comprehension4: "$3"
+            };
+
+            let totalCorrect = 0;
+            const totalQuestions = Object.keys(correctAnswers).length;
+
+            // 2. Unpack JSON and score each individual question
+            if (data.response) {
+            for (const [qName, userResponse] of Object.entries(data.response)) {
+                // Flatten the text answer directly to top-level CSV column
+                data[qName] = userResponse;
+
+                // Check individual accuracy (1 = correct, 0 = incorrect)
+                const isCorrect = userResponse === correctAnswers[qName];
+                data[qName + "_correct"] = isCorrect ? 1 : 0;
+
+                if (isCorrect) {totalCorrect++;}
+                    }
+                }
+            // 3. Overall summary metrics
+            data.num_correct = totalCorrect;
+            data.all_correct = totalCorrect === totalQuestions; // returns true or false
+            }
+        }; 
     timeline.push(instructions_comprehension_check);
     //TO DO: if do poorly on comprehension check, make them re-read the instructions 
 
