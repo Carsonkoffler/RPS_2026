@@ -622,9 +622,29 @@
     [x] participant checks --> (1) Full Screen for games [X] and (2) Browser check 
     [X] figure out what to do if participant doesn't press enter or select a choice in time
    */}
+        
+    //record browser interactions/fullscreen minimizations --> need to add this to data saved 
+    function summarizeBrowserInteractions() {
+        const events = jsPsych.data.getInteractionData().values();
+        return {
+            browser_blur_count:
+                events.filter(e => e.type === "blur").length,
+            browser_focus_count:
+                events.filter(e => e.type === "focus").length,
+            fullscreen_exit_count:
+                events.filter(e => e.type === "fullscreenexit").length,
+            fullscreen_enter_count:
+                events.filter(e => e.type === "fullscreenenter").length
+        };
+    };
 
-   // experiment set up folder: init jsPsych, preload images, set up basic var (participant name, prolific info, participant_images, computer_images, choices)
-        var jsPsych = initJsPsych();
+    // experiment set up folder: init jsPsych, preload images, set up basic var (participant name, prolific info, participant_images, computer_images, choices)
+        var jsPsych = initJsPsych({
+        on_finish: function() {
+            // Append interaction summary metrics to all rows in the datasetg
+            jsPsych.data.addProperties(summarizeBrowserInteractions());
+            }
+        });
 
         var timeline = [];
         var participantName = "You";
@@ -748,23 +768,6 @@
         type: jsPsychFullscreen, 
         fullscreen_mode: true
     });
-    
-
-    //record browser interactions/fullscreen minimizations --> need to add this to data saved 
-    function summarizeBrowserInteractions() {
-        const events = jsPsych.data.getInteractionData().values();
-        return {
-            browser_blur_count:
-                events.filter(e => e.type === "blur").length,
-            browser_focus_count:
-                events.filter(e => e.type === "focus").length,
-            fullscreen_exit_count:
-                events.filter(e => e.type === "fullscreenexit").length,
-            fullscreen_enter_count:
-                events.filter(e => e.type === "fullscreenenter").length,
-            browser_interaction_events: JSON.stringify(events)
-        };
-    };
 
     //Practice Round => Instructions and Game 
     //instructions
