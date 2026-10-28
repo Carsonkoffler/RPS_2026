@@ -740,6 +740,7 @@
             jsPsych.randomization.sampleWithoutReplacement(
             ['Maria', 'James', 'Andre', 'Rohan', 'Zoe'], 1)[0];
     document.getElementById("opponent-label").textContent = computerName;
+    
 
     
     //fullscreen 
@@ -1447,6 +1448,7 @@
 
                 // Save to global jsPsych data output
                 jsPsych.data.addProperties({ participant_name: participantName });
+                jsPsych.data.addProperties({ computer_name: computerName });
 
                 // Safely update the scoreboard DOM label if it exists
                 const labelElem = document.getElementById("participant-label");
@@ -1983,7 +1985,7 @@
                                 participant_outcome_issue: participant_outcome_issue, 
                                 total_player_wins: player_wins,
                                 total_computer_wins: computer_wins,
-                                total_ties: ties,
+                                //total_ties: ties, --> never a tie so no need to save 
                                 participant_flagged: participant_flagged
                             });
                         }
@@ -2668,7 +2670,6 @@
             },
 
             on_finish: function(data) {
-                data.odd_one_out_response = data.response;
                 data.correct = data.response === list.odd_one_out;
                 }
             };
@@ -2863,6 +2864,11 @@
             },
         ],
         randomize_question_order: true,
+        on_finish: function(data){ //flatten data prior to saving 
+            for (const [key, value] of Object.entries(data.response)) {
+                data[key] = value + 1; // Converts 0–6 index range to 1–7 scale
+            }
+        }
         };
         timeline.push(dv_TAR);
 
@@ -2992,6 +2998,11 @@
             }
         ],
         randomize_question_order: true,
+        on_finish: function(data){ //flatten data prior to saving 
+            for (const [key, value] of Object.entries(data.response)) {
+                data[key] = value + 1; // Converts 0–6 index range to 1–7 scale
+            }
+        }
         }; 
         timeline.push(dv_emotion_checklist); 
 
@@ -3070,6 +3081,9 @@
         randomize_question_order: true,
         on_finish: function(data){
             scoreboard.style.display = "none";
+            for (const [key, value] of Object.entries(data.response)) {
+                data[key] = value + 1; // Converts 0–6 index range to 1–7 scale
+            }
             }
         }; 
         timeline.push(dv_ownership); 
