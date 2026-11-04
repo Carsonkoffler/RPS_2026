@@ -596,44 +596,16 @@
         </style>
     </body>
 <script>
-    {/*
-    We are running a rock, paper, scissors game between a participant and a computer opponent.
-    3 (Outcome: Win, Lose, Tie) x 3 (Information: Luck, Strategy/Skill, None) between-subjects design
-
-    Outline: 
-    [x] preload images 
-    [x] consent 
-    [x] welcome precheck participant's computer speed 
-    [x] participant and computer name 
-    [x] practice rounds --> make participants drag response and press enter quickly at "GO"
-    [x] main game --> need to edit the opponent code 
-    [x] post game chat --> information condition manipulation
-    [x] filler task 
-    [x] DV measures 
-    [x] Demos
-    [x] Funnel Questions
-    [x] Save Data
-    [] Debrief and redirect to completion page
-
-    To Do: 
-    [x] participant checks --> (1) Full Screen for games [X] and (2) Browser check [X]
-    [X] figure out what to do if participant doesn't press enter or select a choice in time
-   */}
-        
     //record browser interactions/fullscreen minimizations --> need to add this to data saved 
     function summarizeBrowserInteractions() {
-        const events = jsPsych.data.getInteractionData().values();
+        const interactions = jsPsych.data.getInteractionData();
         return {
-            browser_blur_count:
-                events.filter(e => e.type === "blur").length,
-            browser_focus_count:
-                events.filter(e => e.type === "focus").length,
-            fullscreen_exit_count:
-                events.filter(e => e.type === "fullscreenexit").length,
-            fullscreen_enter_count:
-                events.filter(e => e.type === "fullscreenenter").length
+            browser_blur_count: interactions.filter({event: 'blur' }).count(),
+            browser_focus_count: interactions.filter({event: 'focus' }).count(),
+            fullscreen_exit_count: interactions.filter({event: 'fullscreenexit' }).count(),
+            fullscreen_enter_count: interactions.filter({event: 'fullscreenenter' }).count()
         };
-    };
+    }
 
     // experiment set up folder: init jsPsych, preload images, set up basic var (participant name, prolific info, participant_images, computer_images, choices)
         var jsPsych = initJsPsych({
@@ -675,8 +647,6 @@
         var preload = {
             type: jsPsychPreload,
             images: [
-            //do I want to have different RPS images?
-            //do we want "avatars" for the participant and computer to increase the social presence of the game?
             "exp_code/Images/Rock_Computer.png",
             "exp_code/Images/Rock_Participant.png",
             "exp_code/Images/Paper_Computer.png",
@@ -702,7 +672,7 @@
         };
 
         var choices = ['rock', 'paper', 'scissors'];
-    //recaptcha 
+        //recaptcha 
         const recaptchaTrial = {
             type: jsPsychHtmlKeyboardResponse,
             choices: "NO_KEYS", // Prevent advancing with keypresses
@@ -737,9 +707,9 @@
                 });
             }
         };
-        //timeline.push(recaptchaTrial);
+        timeline.push(recaptchaTrial);
    
-   // consent --> add chris' consent and email her 
+   // consent  
     var consent ={
     type: jsPsychHtmlButtonResponse,
     stimulus: `
@@ -784,14 +754,15 @@
         document.body.innerHTML = `
         <div style="text-align:center; margin-top:100px;">
           <h3>You have chosen not to participate in this study.</h3>
-          <p>Thank you for your time. You may now close this window.</p>
-          <p>Or, you will be automatically redirected in 5 seconds.</p>
+          
+          <p>Thank you for your time! Here is your completion code for Prolific:</p>
+                        
+          <h2 style="color: #2c3e50; margin-top: 20px;">C119QH1P</h2>
         </div>
       `;
-
       // delay redirect
       setTimeout(function() {
-        window.location.href = "https://irb.ucsd.edu/participants/index.html";
+        window.location.href = "https://app.prolific.com/submissions/complete?cc=C119QH1P";
       }, 5000);
 
       // return false prevents jsPsych from continuing the timeline
@@ -799,7 +770,7 @@
             }
         }
     };
-    timeline.push(consent);
+    //timeline.push(consent);
     
     // Welcome to the experiment screen 
     var welcome = {
@@ -816,7 +787,7 @@
             </p> 
             <p> 
                 Since we are pairing participants and studying decision making using response time, we require participants to have quick browser speed.<br>
-                Please use the link below to check your browser speed. <strong>We need you to have an upload speed of 20 Mbps or higher.</strong>  
+                Please use the link below to check your upload speed (found in the purple circle to the right). <strong>We need you to have an upload speed of 20 Mbps or higher.</strong>  
             </p>
             <p><a href="https://www.speedtest.net/" target="_blank">Open Speed Test</a></p>
             <p>If your upload speed is not 20 Mbps or higher, you will still receive a $1 bonus for participation, but you will not advance past this point.</p>
@@ -849,8 +820,7 @@
                         <h3>You have indicated that you do not have the required upload speed for this study.</h3>
                         <p>Your reported speed was <strong>${uploadSpeed} Mbps</strong>.</p>
                         <p>Thank you for your time! Here is your completion code for Prolific:</p>
-                        <!--TO DO: enter the completion code here-->
-                        <h2 style="color: #2c3e50; margin-top: 20px;"></h2>
+                        <h2 style="color: #2c3e50; margin-top: 20px;">C1J4IHRY</h2>
                     </div>
                 `;
                 // Detect active jsPsych instance (camelCase vs lowercase)
@@ -868,7 +838,7 @@
     };
     timeline.push(welcome); 
     
-    //computer name (random assignment to popular name)
+    //computer name
     var computerName = 
             jsPsych.randomization.sampleWithoutReplacement(
             ['maria', 'sonny', 'andre', 'rohan', 'zoe'], 1)[0];
@@ -975,7 +945,7 @@
             task: "rps_instructions"
         }
     }; 
-    timeline.push(rps_instructions);
+    //timeline.push(rps_instructions);
     //comprehension check 
     var instructions_comprehension_check = {
       type: jsPsychSurveyMultiChoice, 
@@ -1058,7 +1028,7 @@
             data.all_correct = totalCorrect === totalQuestions; // returns true or false
             }
         }; 
-    timeline.push(instructions_comprehension_check); 
+    //timeline.push(instructions_comprehension_check); 
 
     //practice round intro
     var practice_intro = {
@@ -1445,7 +1415,7 @@
                 task: "pairing_screen"
             }
         };
-        timeline.push(pairing_screen);
+        //timeline.push(pairing_screen);
 
         //code for the main game starts here  
         function createRPSRound() {
@@ -2051,9 +2021,9 @@
         const postGameMessages = {
             skill: {
                 core: [
-                    "i have a background i game design so i know poeple choose in patterns",
-                    "im a big online poker player so i know most times thigns just come down to skill",
-                    "im a pro gamer (part time obv) so im used to making choices strategically lol"
+                    "i got a background in game design so i know poeple choose in patterns",
+                    "i play hella online poker so i know most times thigns just come down to skill",
+                    "i play hella video games so im used to relying on skill lol"
                 ],
                 lose: [
                     "i guess my strategy worked for me",
@@ -2062,15 +2032,15 @@
                     "i guess my strategy helped me hold my own",
                 ],
                 win: [
-                    "i guess my strategy didnt work this time", //win is the participant win, so the computer should be talking about a loss
+                    "i guess my strategy dindt work this time", //win is the participant win, so the computer should be talking about a loss
                 ]
             },
 
             luck: {
                 core: [
-                    "i have a background in game design so i know poeple choose randomly",
-                    "im a big online poker player so i know most times thigns just come down to luck",
-                    "im a pro game (part time obv) so im used to making choices randomly lol"
+                    "i got a background in game design so i know poeple choose randomly",
+                    "i play hella online poker so i know most times thigns just come down to luck",
+                    "i play hella video games so im used to relying on luck lol"
                 ],
                 lose: [
                     "i guess luck was on my side",
@@ -2085,9 +2055,9 @@
 
             none: {
                 core: [
-                    "i have a background in game design so i liked seeing the UX here",
-                    "im a big online poker player but weirdly enough ive nevr played rock paper scissors online before",
-                    `im a pro gamer (part time obv) so this was a fresh perspective on "gaming" lol`
+                    "i got a background in game design so was mostly checking out how this was buult",
+                    "i play hella online poker but weirdly enough ive nevr played rock paper scissors online befor",
+                    `i play hella video games so it was wierd playing something this simple`
                 ],
                 lose: [
                     "i guess things worked out for me",
@@ -2096,7 +2066,7 @@
                     "i guess things worked out for both of us",
                 ],
                 win: [
-                    "i guess things didnt really work out today",
+                    "i guess things dindt really work out today",
                 ]
             }
         };
@@ -2168,7 +2138,7 @@
                     const outcomeMessage = getRandomMessage(messages[outcomeKey]);
                     
                     // Assign directly to closure variable
-                    opponentMessageText = `${coreMessage}   ${outcomeMessage}`;
+                    opponentMessageText = `${coreMessage}  ${outcomeMessage}`;
                     
                     trial.data = {
                         task: "post_game_chat",
@@ -2243,10 +2213,10 @@
                         checkProceedCondition();
                     }
 
-                    const connectionDelay = 1500;
-                    const thinkingDelay = Math.floor(Math.random() * 1500) + 2000;
+                    const connectionDelay = 2500;
+                    const thinkingDelay = Math.floor(Math.random() * 1500) + 3000;
                     const firstDraftDelay = 1800;
-                    const pauseDeleteDelay = 1800;
+                    const pauseDeleteDelay = 2500;
                     const secondDraftDelay = 1500 + opponentMessageText.length * 25;
 
                     setTimeout(function() {
@@ -2294,7 +2264,8 @@
 
                     proceedBtn.addEventListener("click", function() {
                         jsPsych.data.addDataToLastTrial({
-                            participant_typed_message: participantTypedText
+                            participant_typed_message: participantTypedText,
+                            computer_message: opponentMessageText
                         });
                         jsPsych.finishTrial();
                     });
@@ -2579,7 +2550,7 @@
         };
         timeline.push(dv_attribution)
        
-        // actions list --> To Do: should this be oppoent or ${computerName}
+        // actions list
         var dv_TAR = {
         type: jsPsychSurveyLikert,
         preamble: `
@@ -2655,7 +2626,7 @@
         };
         timeline.push(dv_TAR);
 
-        //dv3 state envy --> TO DO: think of into prompt before the question; double check which adj we want to keep 
+        //dv3 state envy
         var dv_emotion_checklist = {
         type: jsPsychSurveyLikert,
         preamble: `
@@ -2714,12 +2685,6 @@
             required: true
             }, 
             {
-            prompt: "<p>Disappointed</p>",
-            name: "dv3_state_disappointed",
-            labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
-            required: true
-            }, 
-            {
             prompt: "<p>Annoyed</p>",
             name: "dv3_state_annoyed",
             labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
@@ -2736,12 +2701,6 @@
             name: "dv3_state_contempt",
             labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
             required: true
-            }, 
-            {
-            prompt: "<p>Joy</p>", 
-            name: "dv3_state_joy",
-            labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
-            required: true
             }
         ],
         randomize_question_order: true,
@@ -2753,7 +2712,7 @@
         }; 
         timeline.push(dv_emotion_checklist); 
 
-        //dv4 ownership measure --> TO DO: Change this to 2 sliders 
+        //dv4 ownership measure
         var dv_ownership = {
         type: jsPsychHtmlKeyboardResponse,
         stimulus: `
