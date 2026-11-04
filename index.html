@@ -770,7 +770,7 @@
             }
         }
     };
-    //timeline.push(consent);
+    timeline.push(consent);
     
     // Welcome to the experiment screen 
     var welcome = {
@@ -945,7 +945,7 @@
             task: "rps_instructions"
         }
     }; 
-    //timeline.push(rps_instructions);
+    timeline.push(rps_instructions);
     //comprehension check 
     var instructions_comprehension_check = {
       type: jsPsychSurveyMultiChoice, 
@@ -1028,7 +1028,7 @@
             data.all_correct = totalCorrect === totalQuestions; // returns true or false
             }
         }; 
-    //timeline.push(instructions_comprehension_check); 
+    timeline.push(instructions_comprehension_check); 
 
     //practice round intro
     var practice_intro = {
@@ -1378,7 +1378,7 @@
         timeline.push(main_game_intro);
         //var participantName = "Jada";
         document.getElementById("participant-label").textContent = participantName;
-        var pairing_duration = (Math.random() * (20 - 15 + 1) + 20) * 1000; //15-20
+        var pairing_duration = (Math.random() * (25 - 20 + 1) + 20) * 1000; //25-20 sec
 
         var pairing_screen = {
             type: jsPsychHtmlKeyboardResponse,
@@ -1415,7 +1415,7 @@
                 task: "pairing_screen"
             }
         };
-        //timeline.push(pairing_screen);
+        timeline.push(pairing_screen);
 
         //code for the main game starts here  
         function createRPSRound() {
@@ -2807,15 +2807,6 @@
         };
         timeline.push(dv_ownership);
 
-        const save_data = {
-            type: jsPsychPipe,
-            action: "save",
-            experiment_id: "bxhBJ7Rd5Yt4",
-            filename: filename,
-            data_string: () => jsPsych.data.get().csv()  // now includes subject_id column
-            };
-        timeline.push(save_data);
-
        var RA_end = {
         type: jsPsychHtmlButtonResponse,
         stimulus: `
@@ -2941,7 +2932,7 @@
         data: {task: "survey", measure: "attention_check_2"}, 
         on_finish: function(data){
             for (const [key, value] of Object.entries(data.response)) {
-                data[key] = value + 1; // Converts 0–6 index range to 1–7 scale
+                data[key] = value + 1; // Converts 0–4 index range to 1–5 scale
             }
         }
         }
@@ -2970,11 +2961,11 @@
         data: {task: "survey"}, 
         on_finish: function(data){
             for (const [key, value] of Object.entries(data.response)) {
-                data[key] = value; // Converts 0–6 index range to 1–7 scale
+                data[key] = value;
             }
         }
         };
-        //timeline.push(funnel_questions); 
+        timeline.push(funnel_questions); 
 
         ///exit fullscreen before debrief
         const exit_fullscreen = {
@@ -2984,7 +2975,6 @@
         timeline.push(exit_fullscreen);
 
         // save data using jsPsych-Pipe
-        /*
         const save_data = {
             type: jsPsychPipe,
             action: "save",
@@ -2992,7 +2982,7 @@
             filename: filename,
             data_string: () => jsPsych.data.get().csv()  // now includes subject_id column
             };
-        timeline.push(save_data);*/
+        timeline.push(save_data);
 
         //debrief 
         var debrief = {
@@ -3008,10 +2998,10 @@
         choices: ["Complete"],       // prevent manual advancement
         trial_duration: 60000,     // display for a minute
         on_finish: function(data) {
-            window.location.href = "https://app.prolific.co/submissions/complete?cc=XXXX";  // PUT PROLIFIC COMPLETION URL HERE 
+            window.location.href = "https://app.prolific.com/submissions/complete?cc=C1QOTM05";  // PUT PROLIFIC COMPLETION URL HERE 
         }
         };
-        //timeline.push(debrief);
+        timeline.push(debrief);
 
 // Run the experiment
 jsPsych.run(timeline)
