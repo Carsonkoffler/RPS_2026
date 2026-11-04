@@ -2965,7 +2965,12 @@
             action: "save",
             experiment_id: "bxhBJ7Rd5Yt4",
             filename: filename,
-            data_string: () => jsPsych.data.get().csv()  // now includes subject_id column
+            on_start: function(){
+                jsPsych.data.addProperties(summarizeBrowserInteractions());
+            },
+            data_string: function(){
+                return jsPsych.data.get().csv();
+            }
             };
         timeline.push(save_data);
 
