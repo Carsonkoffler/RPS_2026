@@ -798,45 +798,71 @@
             required: true,
             placeholder: "Enter number (e.g. 25.5)",
             attributes: {
-                type: "number", // Forces HTML5 numeric validation
-                min: "0",       // Disallows negative numbers
-                step: "any"     // Allows floating-point decimals like 20.5
+                type: "number",
+                min: "0",
+                step: "any"
             }
         }],
         on_finish: function(data) {
-            // Extract string response and parse float
             const rawInput = data.response ? data.response.uploadSpeed : "";
             const uploadSpeed = parseFloat(rawInput);
 
-            // Save clean flattened variables to output CSV
-            data.upload_speed = uploadSpeed;
-            data.passed_speed_check = uploadSpeed >= 20.0;
+            data.task = "welcome";
+            data.upload_speed = isNaN(uploadSpeed) ? null : uploadSpeed;
+            data.passed_speed_check = !isNaN(uploadSpeed) && uploadSpeed >= 20.0;
+            
             delete data.response;
-
-            // Redirect ONLY if the user successfully entered a valid number under 20.0
-            if (isNaN(uploadSpeed) || uploadSpeed < 20.0) {
-                const exitHtml = `
-                    <div style="text-align: center; margin-top: 100px; font-family: Arial, sans-serif;">
-                        <h3>You have indicated that you do not have the required upload speed for this study.</h3>
-                        <p>Your reported speed was <strong>${uploadSpeed} Mbps</strong>.</p>
-                        <p>Thank you for your time! Here is your completion code for Prolific:</p>
-                        <h2 style="color: #2c3e50; margin-top: 20px;">C1J4IHRY</h2>
-                    </div>
-                `;
-                // Detect active jsPsych instance (camelCase vs lowercase)
-                const jsPsychInstance = (typeof jsPsych !== "undefined" && jsPsych.endExperiment) ? jsPsych 
-                                    : (typeof jspsych !== "undefined" && jspsych.endExperiment) ? jspsych 
-                                    : null;
-
-                if (jsPsychInstance) {
-                    jsPsychInstance.endExperiment(exitHtml);
-                } else {
-                    document.body.innerHTML = exitHtml;
-                }
-            }
         }
     };
-    timeline.push(welcome); 
+
+    // 2. Screenout Conditional Sub-Timeline
+    const screenout_node = {
+        timeline: [
+            //Save data to DataPipe
+            {
+                type: jsPsychPipe,
+                action: "save",
+                experiment_id: "bxhBJ7Rd5Yt4",
+                filename: filename,
+                on_start: function() {
+                    if (typeof summarizeBrowserInteractions === "function") {
+                        jsPsych.data.addProperties(summarizeBrowserInteractions());
+                    }
+                },
+                data_string: function() {
+                    return jsPsych.data.get().csv();
+                }
+            },
+            //Display exit screen and stop the experiment
+            {
+                type: jsPsychHtmlKeyboardResponse,
+                choices: "NO_KEYS",
+                stimulus: function() {
+                    const welcomeData = jsPsych.data.get().filter({ task: "welcome" }).values()[0];
+                    const speed = welcomeData ? welcomeData.upload_speed : null;
+                    return `
+                        <div style="text-align: center; margin-top: 100px; font-family: Arial, sans-serif;">
+                            <h3>You have indicated that you do not have the required upload speed for this study.</h3>
+                            <p>Your reported speed was <strong>${speed !== null ? speed + ' Mbps' : 'invalid'}</strong>.</p>
+                            <p>Thank you for your time! Here is your completion code for Prolific:</p>
+                            <h2 style="color: #2c3e50; margin-top: 20px;">C1J4IHRY</h2>
+                        </div>
+                    `;
+                },
+                on_start: function() {
+                    // Halts any remaining trials behind this conditional node
+                    jsPsych.endExperiment();
+                }
+            }
+        ],
+        // Only runs this sub-timeline if participant failed the speed check
+        conditional_function: function() {
+            const welcomeData = jsPsych.data.get().filter({ task: "welcome" }).values()[0];
+            return welcomeData ? !welcomeData.passed_speed_check : false;
+        }
+    };
+    timeline.push(welcome);
+    timeline.push(screenout_node);
     
     //computer name
     var computerName = 
@@ -2265,7 +2291,8 @@
                     proceedBtn.addEventListener("click", function() {
                         jsPsych.data.addDataToLastTrial({
                             participant_typed_message: participantTypedText,
-                            computer_message: opponentMessageText
+                            computer_message: opponentMessageText, 
+                            infoCondition: participant_info
                         });
                         jsPsych.finishTrial();
                     });
