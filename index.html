@@ -2806,21 +2806,6 @@
         }
         };
         timeline.push(dv_ownership);
-
-       var RA_end = {
-        type: jsPsychHtmlButtonResponse,
-        stimulus: `
-            <h2>Demos, Funnel, and Debrief</h2>
-            <p>Demographics, funnel questions, and a debrief will follow, but that isn't necessary for you to review.</p>
-            <p>So, this is where you and I part ways.</p>
-        `,
-        choices: ["Goodbye."],
-        trial_duration: 10000, // End automatically after 10 seconds
-        on_finish: function(data) {
-            window.location.href = "https://forms.gle/v5rLdjptERog5H6u5";
-        }
-        };
-        timeline.push(RA_end);
         
         //demos 
         var demographics = {
