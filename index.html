@@ -1283,6 +1283,8 @@
                 random_condition: random_condition,
                 participant_outcome: participant_outcome
             });
+        
+        let actual_participant_outcome;
 
         const wins_by_condition = {
                 '4v0': 4,
@@ -2015,7 +2017,6 @@
                     });
                 }, 
                 on_finish: function() {
-                    let actual_participant_outcome;
                     if (player_wins == 3 || player_wins == 4) {
                         actual_participant_outcome = "win";
                     } else if (player_wins == 0 || player_wins == 1) {
