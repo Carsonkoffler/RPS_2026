@@ -2166,6 +2166,9 @@
                             actual_participant_outcome = "tie";
                         }
                     }
+                    jspsych.data.addProperties({
+                        actual_participant_outcome: actual_participant_outcome
+                    });
 
                     // Read live runtime values
                     const cond = infoCondition && postGameMessages[infoCondition] ? infoCondition : "none";
