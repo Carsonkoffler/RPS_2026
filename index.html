@@ -2045,12 +2045,12 @@
             infoConditions, 1)[0];
 
         let actual_participant_outcome;
-            if (player_wins > 2) {
+            if (player_wins == 3 || player_wins == 4) {
                 actual_participant_outcome = "win";
-            } else if (player_wins < 2) {
+            } else if (player_wins == 0 || player_wins == 1) {
                 actual_participant_outcome = "lose";
             } else {
-                actual_participant_outcome = "tie";
+                actual_participant_outcome = "tie"; // catches 2
             }
         jsPsych.data.addProperties({actual_participant_outcome: actual_participant_outcome})
         
