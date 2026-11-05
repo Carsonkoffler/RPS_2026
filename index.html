@@ -2166,9 +2166,6 @@
                             actual_participant_outcome = "tie";
                         }
                     }
-                    jspsych.data.addProperties({
-                        actual_participant_outcome: actual_participant_outcome
-                    });
 
                     // Read live runtime values
                     const cond = infoCondition && postGameMessages[infoCondition] ? infoCondition : "none";
@@ -2307,7 +2304,8 @@
                         jsPsych.data.addDataToLastTrial({
                             participant_typed_message: participantTypedText,
                             computer_message: opponentMessageText, 
-                            infoCondition: participant_info
+                            infoCondition: participant_info,
+                            actual_participant_outcome: actual_participant_outcome
                         });
                         jsPsych.finishTrial();
                     });
