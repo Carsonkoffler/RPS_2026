@@ -2044,6 +2044,17 @@
         const participant_info = jsPsych.randomization.sampleWithoutReplacement(
             infoConditions, 1)[0];
 
+        let actual_participant_outcome;
+            if (player_wins > 2) {
+                actual_participant_outcome = "win";
+            } else if (player_wins < 2) {
+                actual_participant_outcome = "lose";
+            } else {
+                actual_participant_outcome = "tie";
+            }
+        jsPsych.data.addProperties({actual_participant_outcome: actual_participant_outcome})
+        
+
         const postGameMessages = {
             skill: {
                 core: [
@@ -2101,7 +2112,7 @@
             return jsPsych.randomization.sampleWithoutReplacement(messages, 1)[0];
         } 
         // messaging function 
-        function createChatTrial(participant_outcome, infoCondition) {
+        function createChatTrial(actual_participant_outcome, infoCondition) {
             // Variable shared between on_start and on_load via closure
             let opponentMessageText = "";
 
@@ -2158,7 +2169,7 @@
                     // Fallbacks prevent runtime errors if conditions or outcomes don't match dictionary keys exactly
                     const cond = infoCondition && postGameMessages[infoCondition] ? infoCondition : "none";
                     const messages = postGameMessages[cond];
-                    const outcomeKey = messages[participant_outcome] ? participant_outcome : "tie";
+                    const outcomeKey = messages[actual_participant_outcome] ? actual_participant_outcome : "tie";
 
                     const coreMessage = getRandomMessage(messages.core).replace(/\{participantName\}/g, participantName);
                     const outcomeMessage = getRandomMessage(messages[outcomeKey]);
@@ -2299,7 +2310,7 @@
                 }
             };
         }
-        timeline.push(createChatTrial(participant_outcome, participant_info)); 
+        timeline.push(createChatTrial(actual_participant_outcome, participant_info)); 
 
 
         var filler_lists = [
