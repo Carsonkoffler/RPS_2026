@@ -2156,7 +2156,8 @@
                     `;
                 },
                 on_start: function(trial) {
-                    // Guarantee actual_participant_outcome is evaluated dynamically at runtime:
+                    // guarentee that the actual_participant_outcome variable is defined and message based on the actual outcome of the game, not the assigned outcome 
+                        // controls for cases where participant timed out or did not select a choice, which makes actual outcome different from assigned outcome
                     if (typeof actual_participant_outcome === "undefined" || actual_participant_outcome === null) {
                         if (player_wins == 3 || player_wins == 4) {
                             actual_participant_outcome = "win";
