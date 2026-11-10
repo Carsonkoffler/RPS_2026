@@ -1460,18 +1460,14 @@
             `;
         },
         choices: ['Begin Game'],
+        button_html: '<button class="jspsych-btn" id="begin-game-btn" style="display: none;">%choice%</button>',
         on_load: function() {
-            // Hide the button container initially during pairing
-            const buttonGroup = document.querySelector('.jspsych-html-button-response-btngroup');
-            if (buttonGroup) {
-                buttonGroup.style.display = 'none';
-            }
-
             // After pairing delay finishes, reveal the button and update text
             setTimeout(function() {
                 var status = document.getElementById("connection-status");
                 var loadingIcon = document.getElementById("loading-icon");
                 var waitingMessage = document.getElementById("waiting-message");
+                var buttonGroup = document.getElementById("begin-game-btn");
 
                 if (status) {
                     status.innerHTML = `
@@ -1483,10 +1479,8 @@
                 }
 
                 // Reveal Begin Game button
-                if (buttonGroup) {
-                    buttonGroup.style.display = 'block';
-                }
-            }, pairing_duration);
+                if (buttonGroup) {buttonGroup.style.display = 'inline-block';}
+                }, pairing_duration);
         },
         on_finish: function(data) {
             // Excludes button click being saved
