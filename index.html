@@ -621,7 +621,6 @@
         // Generate random subject ID for data filename
         const subject_id = jsPsych.randomization.randomID(10);
         jsPsych.data.addProperties({ subject_id: subject_id });
-        const filename = `${session_id}.csv`;
 
         var experiment_date = new Date().toISOString().slice(0,10);
         jsPsych.data.addProperties({
@@ -635,6 +634,9 @@
         var session_id = jsPsych.data.getURLVariable('SESSION_ID') || null;
 
         var prolific_id_last4 = prolific_id ? prolific_id.slice(-4) : "NA";
+        
+        const filename = session_id ? `${session_id}.csv` : `${subject_id}.csv`;
+
 
         var screenoutKey = 'rps_speed_screenout' + prolific_id;
         if (localStorage.getItem(screenoutKey) === 'true') {
