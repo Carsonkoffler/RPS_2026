@@ -761,7 +761,7 @@
         records.
     </p>`,
     choices: ['I Consent', 'I Do Not Consent'],
-    data: { task: 'consent' },
+    data: { task: 'consent' }, 
     on_finish: function(data) {
             if (data.response === 1) {
                 jsPsych.data.addProperties({ reason: "participant_declined_consent" });
@@ -1442,41 +1442,59 @@
         var pairing_duration = (Math.random() * (25 - 20 + 1) + 20) * 1000; //25-20 sec
 
         var pairing_screen = {
-            type: jsPsychHtmlKeyboardResponse,
-            stimulus: `
-                <div id="pairing-screen">
-                    <h2>Pairing</h2>
-                    <p id="connection-status" style="z-index: 999;">
-                        We are currently trying to pair you with another participant. Please wait patiently to be matched. This may take a few minutes.
-                        <br>Please do NOT minimize this window or navigate to another page.
+        type: jsPsychHtmlButtonResponse,
+        stimulus: function() {
+            return `
+                <div id="pairing-screen" style="max-width: 650px; margin: 0 auto; text-align: center; font-family: Arial, sans-serif;">
+                    <h2 style="font-size: 32px; margin-bottom: 15px;">Pairing</h2>
+                    <p id="connection-status" style="font-size: 18px; line-height: 1.5; color: #333;">
+                        We are currently trying to pair you with another participant. Please wait patiently to be matched. This may take a few minutes.<br>
+                        <strong>Please do NOT minimize this window or navigate to another page.</strong>
                     </p>
-                    <img id = "loading-icon" src="exp_code/Images/Loading_icon.gif"
+                    <img id="loading-icon" src="exp_code/Images/Loading_icon.gif"
                         alt="Loading"
                         width="200"
-                        style="z-index: 50">
-                    <p id="waiting-message">Waiting for 1 participant to join.</p>
+                        style="margin: 20px auto; display: block;">
+                    <p id="waiting-message" style="font-size: 16px; color: #666;">Waiting for 1 participant to join...</p>
                 </div>
-            `,
-            choices: "NO_KEYS",
-            trial_duration: pairing_duration, 
-            on_load: function() {
-                setTimeout(function() {
-                    var status = document.getElementById("connection-status");
-                    var loadingIcon = document.getElementById("loading-icon");
-                    var waitingMessage = document.getElementById("waiting-message");
-                    if (status) {
-                        status.textContent = `You have been paired with ${computerName}. Game will begin shortly.`;
-                        loadingIcon.style.display = "none"; // Hide the loading icon
-                        waitingMessage.style.display = "none"; // Hide the waiting message
-                    }
-                }, pairing_duration - 5000); 
-            },
-
-            data: {
-                task: "pairing_screen"
+            `;
+        },
+        choices: ['Begin Game'],
+        on_load: function() {
+            // Hide the button container initially during pairing
+            const buttonGroup = document.querySelector('.jspsych-html-button-response-btngroup');
+            if (buttonGroup) {
+                buttonGroup.style.display = 'none';
             }
-        };
-        timeline.push(pairing_screen);
+
+            // After pairing delay finishes, reveal the button and update text
+            setTimeout(function() {
+                var status = document.getElementById("connection-status");
+                var loadingIcon = document.getElementById("loading-icon");
+                var waitingMessage = document.getElementById("waiting-message");
+
+                if (status) {
+                    status.innerHTML = `
+                        <span style="color: #198754; font-size: 24px; font-weight: bold;">You have been paired with ${computerName}!</span><br><br>
+                        Click the button below when you are ready to start Round 1.
+                    `;
+                    if (loadingIcon) loadingIcon.style.display = "none";
+                    if (waitingMessage) waitingMessage.style.display = "none";
+                }
+
+                // Reveal Begin Game button
+                if (buttonGroup) {
+                    buttonGroup.style.display = 'block';
+                }
+            }, pairing_duration);
+        },
+        on_finish: function(data) {
+            // Excludes button click being saved
+            data.ignore_data = true;
+        }
+    };
+
+    timeline.push(pairing_screen);
 
         //code for the main game starts here  
         function createRPSRound() {
