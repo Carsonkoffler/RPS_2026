@@ -621,7 +621,7 @@
         // Generate random subject ID for data filename
         const subject_id = jsPsych.randomization.randomID(10);
         jsPsych.data.addProperties({ subject_id: subject_id });
-        const filename = `${subject_id}.csv`;
+        const filename = `${session_id}.csv`;
 
         var experiment_date = new Date().toISOString().slice(0,10);
         jsPsych.data.addProperties({
@@ -747,26 +747,21 @@
     </p>`,
     choices: ['I Consent', 'I Do Not Consent'],
     data: { task: 'consent' },
-    on_finish: function(data){
-      if(data.response === 1){
-        jsPsych.data.addProperties({ reason: "participant_declined_consent" }); //log reason for non-consent
-        
-        document.body.innerHTML = `
-        <div style="text-align:center; margin-top:100px;">
-          <h3>You have chosen not to participate in this study.</h3>
-          
-          <p>Thank you for your time! Here is your completion code for Prolific:</p>
-                        
-          <h2 style="color: #2c3e50; margin-top: 20px;">C119QH1P</h2>
-        </div>
-      `;
-      // delay redirect
-      setTimeout(function() {
-        window.location.href = "https://app.prolific.com/submissions/complete?cc=C119QH1P";
-      }, 60000);
+    on_finish: function(data) {
+            if (data.response === 1) {
+                jsPsych.data.addProperties({ reason: "participant_declined_consent" });
 
-      // return false prevents jsPsych from continuing the timeline
-      return false;
+                setTimeout(function() {
+                    window.location.href = "https://app.prolific.com/submissions/complete?cc=C119QH1P";
+                }, 60000);
+
+                jsPsych.endExperiment(`
+                    <div style="text-align:center; margin-top:100px;">
+                        <h3>You have chosen not to participate in this study.</h3>
+                        <p>Thank you for your time! Here is your completion code for Prolific:</p>
+                        <h2 style="color:#2c3e50; margin-top:20px;">C119QH1P</h2>
+                        <p><a href="https://app.prolific.com/submissions/complete?cc=C119QH1P">Click here to return to Prolific</a></p>
+                    </div>`);
             }
         }
     };
@@ -846,12 +841,15 @@
                             <p>Your reported speed was <strong>${speed !== null ? speed + ' Mbps' : 'invalid'}</strong>.</p>
                             <p>Thank you for your time! Here is your completion code for Prolific:</p>
                             <h2 style="color: #2c3e50; margin-top: 20px;">C1J4IHRY</h2>
+                            <p><a href="https://app.prolific.com/submissions/complete?cc=C1J4IHRY">Click here to return to Prolific</a></p>
                         </div>
                     `;
                 },
-                on_start: function() {
-                    // Halts any remaining trials behind this conditional node
-                    jsPsych.endExperiment();
+                on_load: function() {
+                    // Automatically redirect to Prolific after 60 seconds
+                    setTimeout(function() {
+                        window.location.href = "https://app.prolific.com/submissions/complete?cc=C1J4IHRY";
+                    }, 60000);
                 }
             }
         ],
@@ -1265,9 +1263,26 @@
         };
 
         // assign conditions: 5 possible conditions: 4v0, 3v1, 2v2, 1v3, 0v4 --> turn into win/lose/tie conditions
-        var random_condition = 
-            jsPsych.randomization.sampleWithoutReplacement(
-            ['4v0', '3v1', '2v2', '1v3', '0v4'], 1)[0];
+        const conditionWeights = [
+            {condition: '4v0', weight: 21},
+            {condition: '3v1', weight: 20},
+            {condition: '2v2', weight: 71},
+            {condition: '1v3', weight: 12},
+            {condition: '0v4', weight: 30}
+        ]
+
+        function weightedRandomChoice(choices) {
+            const totalWeight = choices.reduce((sum, choice) => sum + choice.weight, 0);
+            let randomNum = Math.random() * totalWeight;
+            for (const choice of choices) {
+                if (randomNum < choice.weight) {
+                    return choice.condition;
+                }
+                randomNum -= choice.weight;
+            }
+        }
+
+        var random_condition = weightedRandomChoice(conditionWeights);
         
         var participant_outcome; 
         
@@ -2709,7 +2724,7 @@
             },
             {
             prompt: "<p>Proud</p>",
-            name: "dv3_state_compassionate",
+            name: "dv3_state_proud",
             labels: ["Strongly Disagree", "Moderately Disagree", "Disagree a little", "Neither agree nor disagree", "Agree a little", "Moderately Agree", "Strongly Agree"],
             required: true
             },
