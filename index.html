@@ -630,11 +630,26 @@
 
         // capture info from Prolific
         //var subject_id = jsPsych.data.getURLVariable('PROLIFIC_PID'); do not capture prolific PID yet
-        var prolific_id = jsPsych.data.getURLVariable('PROLIFIC_PID') || null; 
+        var prolific_id = jsPsych.data.getURLVariable('PROLIFIC_PID') || 'local_test'; 
         var study_id = jsPsych.data.getURLVariable('STUDY_ID') || null;
         var session_id = jsPsych.data.getURLVariable('SESSION_ID') || null;
 
         var prolific_id_last4 = prolific_id ? prolific_id.slice(-4) : "NA";
+
+        var screenoutKey = 'rps_speed_screenout' + prolific_id;
+        if (localStorage.getItem(screenoutKey) === 'true') {
+            document.addEventListener('DOMContentLoaded', function() {
+                document.body.innerHTML = `
+                    <div style="text-align:center; margin-top:100px;">
+                        <h3>Access Denied</h3>
+                        <p>You have already completed the browser screening test for this study, and you did not meet the required upload speed.</p><br>
+                        <p>Thank you for your time! Here is your completion code for Prolific:</p>
+                        <h2 style="color:#2c3e50; margin-top:20px;">C1J4IHRY</h2>
+                        <p><a href="https://app.prolific.com/submissions/complete?cc=C1J4IHRY">Click here to return to Prolific</a></p>
+                    </div>`;
+            });
+            throw new Error("Participant has already been screened out due to insufficient upload speed.");
+        }
 
         jsPsych.data.addProperties({
             prolific_id_last4: prolific_id_last4,
@@ -801,11 +816,16 @@
         on_finish: function(data) {
             const rawInput = data.response ? data.response.uploadSpeed : "";
             const uploadSpeed = parseFloat(rawInput);
+            const passed = !isNaN(uploadSpeed) && uploadSpeed >= 20.0;
 
             data.task = "welcome";
             data.upload_speed = isNaN(uploadSpeed) ? null : uploadSpeed;
-            data.passed_speed_check = !isNaN(uploadSpeed) && uploadSpeed >= 20.0;
+            data.passed_speed_check = passed;
             
+            if (!passed) {
+                localStorage.setItem(screenoutKey, 'true');
+            }
+
             delete data.response;
         }
     };
